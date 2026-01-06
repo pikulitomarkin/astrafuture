@@ -1,0 +1,135 @@
+# ========================================
+# AstraFuture - .gitignore
+# ========================================
+
+# ============ .NET / C# ============
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio cache/options
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## .NET Core
+.dotnet/
+.tools/
+
+# ============ Node.js / Frontend ============
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+## Build output
+.next/
+out/
+dist/
+build/
+.cache/
+
+## Environment variables
+.env
+.env*.local
+.env.production
+.env.development
+
+## Testing
+coverage/
+*.lcov
+.nyc_output
+
+## Vercel
+.vercel
+
+# ============ IDEs / Editors ============
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============ Database ============
+*.db
+*.sqlite
+*.sqlite3
+
+# ============ Logs ============
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============ OS ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ Secrets & Config ============
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+## Supabase
+.supabase/
+
+## Redis
+dump.rdb
+
+# ============ CI/CD ============
+.github/workflows/*.yml.backup
+
+# ============ Docker ============
+docker-compose.override.yml
+
+# ============ Terraform / IaC ============
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraformrc
+terraform.rc
+
+# ============ Temporary Files ============
+*.tmp
+*.temp
+*.bak
+*.swp
+*~.nib
