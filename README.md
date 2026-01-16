@@ -1,55 +1,64 @@
-# AstraFuture - Arquitetura Técnica Completa
+# 🚀 AstraFuture - Sistema de Agendamentos Multi-Tenant
 
-## 📋 Índice de Documentação
-
-### 🏗️ Arquitetura
-- [**00-OVERVIEW.md**](./architecture/00-OVERVIEW.md) - Visão geral da arquitetura, decisões técnicas e stack
-
-### 💾 Database
-- [**schema.sql**](./database/schema.sql) - Schema completo do PostgreSQL com RLS
-- [**README.md**](./database/README.md) - Documentação detalhada do banco de dados
-
-### 🔌 API
-- [**README.md**](./api/README.md) - Especificação completa da API RESTful
-
-### 🔄 Workflows
-- [**whatsapp-onboarding.md**](./workflows/whatsapp-onboarding.md) - Fluxo de onboarding via WhatsApp
-
-### 🎨 UX
-- [**ux-strategy.md**](./docs/ux-strategy.md) - Estratégia de UX Premium
+> **Status:** ✅ Semana 1 Completa - 70% do MVP Implementado  
+> **Última atualização:** 16 Janeiro 2026
 
 ---
 
-## 🚀 Quick Start
+## 📊 Status do Projeto
 
-### Prerequisites
-- .NET 8 SDK
-- PostgreSQL 15+ (ou Supabase)
-- Redis 7+
-- Node.js 20+
-- Docker (opcional)
+| Componente | Status | Progresso |
+|-----------|--------|-----------|
+| Backend API | ✅ Completo | 100% |
+| Frontend Base | ✅ Completo | 100% |
+| Autenticação | ✅ Completo | 100% |
+| CRUD Appointments | 🟡 Parcial | 50% |
+| Deploy | ⏸️ Pendente | 0% |
+| **TOTAL MVP** | 🟡 Em Progresso | **70%** |
 
-### Clonar e Setup
+---
 
+## 📋 Documentação Rápida
+
+### 🏃‍♂️ Setup Rápido
+- **[SETUP-FRONTEND.md](./SETUP-FRONTEND.md)** - Como rodar o frontend em 5 minutos
+- **[SETUP-SUPABASE.md](./SETUP-SUPABASE.md)** - Configurar database e auth
+
+### 📈 Progresso
+- **[ENTREGA-SEMANA-1.md](./ENTREGA-SEMANA-1.md)** - Resumo completo da Semana 1
+- **[PROGRESSO-DIA-5.md](./PROGRESSO-DIA-5.md)** - Detalhes do último dia
+- **[PLANO-EXECUCAO.md](./PLANO-EXECUCAO.md)** - Roadmap completo (11 dias)
+
+### 🏗️ Arquitetura
+- **[architecture/00-OVERVIEW.md](./architecture/00-OVERVIEW.md)** - Visão geral técnica
+- **[database/schema.sql](./database/schema.sql)** - Schema PostgreSQL com RLS
+
+---
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- ✅ .NET 9.0 SDK
+- ✅ Node.js 18+
+- ✅ Conta Supabase (grátis)
+
+### Backend (.NET)
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-org/astrafuture.git
-cd astrafuture
+cd backend-src/AstraFuture.Api
+dotnet run
+```
+Backend em: `http://localhost:5000`
 
-# Backend (.NET)
-cd backend
-dotnet restore
-dotnet build
-
-# Frontend (Next.js)
-cd ../frontend
+### Frontend (Next.js)
+```bash
+cd frontend
 npm install
 npm run dev
-
-# Database
-cd ../database
-psql -U postgres -f schema.sql
 ```
+Frontend em: `http://localhost:3000`
+
+### Detalhes Completos
+Veja [SETUP-FRONTEND.md](./SETUP-FRONTEND.md) para instruções detalhadas.
 
 ---
 

@@ -207,7 +207,7 @@ CREATE TABLE appointments (
     -- Schedule
     scheduled_at TIMESTAMPTZ NOT NULL,
     duration_minutes INT NOT NULL DEFAULT 60,
-    ends_at TIMESTAMPTZ GENERATED ALWAYS AS (scheduled_at + (duration_minutes || ' minutes')::INTERVAL) STORED,
+    ends_at TIMESTAMPTZ NOT NULL,
     
     -- Details
     title VARCHAR(255) NOT NULL,
@@ -581,6 +581,23 @@ CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments
 
 CREATE TRIGGER update_availability_exceptions_updated_at BEFORE UPDATE ON availability_exceptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+
+-- Trigger para calcular ends_at automaticamente
+CREATE OR REPLACE FUNCTION calculate_appointment_ends_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.ends_at = NEW.scheduled_at + (NEW.duration_minutes || ' minutes')::INTERVAL;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_appointment_ends_at
+BEFORE INSERT OR UPDATE ON appointments
+FOR EACH ROW
+WHEN (NEW.scheduled_at IS NOT NULL AND NEW.duration_minutes IS NOT NULL)
+EXECUTE FUNCTION calculate_appointment_ends_at();
 
 -- =====================================================
 
