@@ -3,18 +3,33 @@
 import { useState } from 'react'
 import { Header } from '@/components/dashboard/header'
 import { AppointmentCard } from '@/components/appointments/appointment-card'
+import { AppointmentDialog } from '@/components/appointments/appointment-dialog'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { useAppointments, useDeleteAppointment } from '@/hooks/use-appointments'
+import type { Appointment } from '@/types'
 
 export default function AppointmentsPage() {
   const { data: appointments, isLoading, error } = useAppointments()
   const deleteAppointment = useDeleteAppointment()
 
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | undefined>()
+
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment)
+    setDialogOpen(true)
+  }
+
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este agendamento?')) {
       deleteAppointment.mutate(id)
     }
+  }
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false)
+    setEditingAppointment(undefined)
   }
 
   return (
@@ -34,7 +49,7 @@ export default function AppointmentsPage() {
               {appointments?.length || 0} agendamento(s) encontrado(s)
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Agendamento
           </Button>
@@ -75,7 +90,7 @@ export default function AppointmentsPage() {
             <p className="text-gray-600 mb-6">
               Comece criando seu primeiro agendamento
             </p>
-            <Button>
+            <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeiro Agendamento
             </Button>
@@ -88,12 +103,19 @@ export default function AppointmentsPage() {
               <AppointmentCard
                 key={appointment.id}
                 appointment={appointment}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
               />
             ))}
           </div>
         )}
       </div>
+
+      <AppointmentDialog
+        open={dialogOpen}
+        onOpenChange={handleCloseDialog}
+        appointment={editingAppointment}
+      />
     </div>
   )
 }

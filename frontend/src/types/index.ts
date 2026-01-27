@@ -40,11 +40,13 @@ export interface Resource {
 export interface User {
   id: string
   email: string
-  tenantId: string
+  tenantId?: string
 }
 
 export interface AuthResponse {
-  token: string
+  accessToken: string
+  refreshToken?: string
+  expiresIn: number
   user: User
 }
 
@@ -57,4 +59,34 @@ export interface RegisterRequest {
   email: string
   password: string
   businessName: string
+  fullName?: string
+  tenantId?: string
+}
+
+export interface ApiKey {
+  id: string
+  key: string
+  name: string
+  description?: string
+  isActive: boolean
+  lastUsedAt?: string
+  expiresAt: string
+  usageCount: number
+  rateLimit?: number
+  createdAt: string
+}
+
+export interface CreateApiKeyRequest {
+  name: string
+  description?: string
+  expiresInDays?: number
+  rateLimit?: number
+}
+
+export interface WebhookUrls {
+  webhookUrl: string
+  createCustomerUrl: string
+  createAppointmentUrl: string
+  checkCustomerUrl: string
+  instructions: string
 }

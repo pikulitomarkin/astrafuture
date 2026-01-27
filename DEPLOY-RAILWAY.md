@@ -50,55 +50,46 @@
 3. Faça login com GitHub
 4. Autorize o Railway a acessar seus repos
 
-### Passo 2: Criar Novo Projeto
+### Passo 2: Criar Novo Projeto para o Backend
 
 1. No dashboard, clique em "New Project"
 2. Selecione "Deploy from GitHub repo"
-3. Escolha o repositório `Astrafuture`
-4. Selecione a branch `main`
+3. Escolha o repositório `astrafuture`
+4. **IMPORTANTE:** Clique em "Add Service" ou "Configure"
+5. **Root Directory:** `backend-src`
+6. Railway vai detectar o `railway.toml` e o `Dockerfile` automaticamente
 
-### Passo 3: Configurar o Projeto
-
-Railway vai detectar automaticamente que é um projeto .NET!
-
-**Configurações importantes:**
-
-1. **Root Directory:**
-   ```
-   backend-src/AstraFuture.Api
-   ```
-
-2. **Build Command:** (Railway detecta automaticamente)
-   ```bash
-   dotnet publish -c Release -o out
-   ```
-
-3. **Start Command:**
-   ```bash
-   dotnet out/AstraFuture.Api.dll
-   ```
-
-4. **Port:** Railway configura automaticamente
-   - Geralmente usa `$PORT` variável de ambiente
-
-### Passo 4: Configurar Variáveis de Ambiente
+### Passo 3: Configurar Variáveis de Ambiente
 
 No dashboard do Railway, vá em **Variables** e adicione:
 
 ```bash
+# Connection String
+ConnectionStrings__DefaultConnection=Host=aws-0-us-west-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.alxtzjmtclopraayehfg;Password=SUA_SENHA
+
 # Supabase
-SUPABASE_URL=https://seu-projeto.supabase.co
-SUPABASE_KEY=sua_service_role_key
-SUPABASE_JWT_SECRET=seu_jwt_secret
+Supabase__Url=https://alxtzjmtclopraayehfg.supabase.co
+Supabase__ServiceRoleKey=SUA_SERVICE_ROLE_KEY
+Supabase__AnonKey=SUA_ANON_KEY
+
+# JWT
+Jwt__Secret=AstraFuture2026-Super-Secret-Key-Min-32-Chars-JWT-Signing
+Jwt__Issuer=AstraFuture
+Jwt__Audience=AstraFuture
+Jwt__ExpirationMinutes=1440
 
 # ASP.NET
 ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_URLS=http://0.0.0.0:$PORT
+```
 
-# CORS (será o domínio Vercel)
-ALLOWED_ORIGINS=https://seu-app.vercel.app
+### Passo 4: Deploy
 
-# JWT
+1. Clique em "Deploy"
+2. Railway vai buildar usando o Dockerfile
+3. Após o build, você receberá uma URL (ex: `https://astrafuture-backend-production.up.railway.app`)
+4. Teste a API acessando: `https://sua-url.railway.app/api/health` (se tiver endpoint de health)
+
+---# JWT
 JWT_SECRET=seu_jwt_secret_super_seguro_aqui
 JWT_ISSUER=AstraFuture
 JWT_AUDIENCE=AstraFuture.Users
@@ -413,6 +404,18 @@ Seu app está online e funcionando!
 **URLs para compartilhar:**
 - Frontend: `https://seu-app.vercel.app`
 - API (Swagger): `https://seu-app.up.railway.app/swagger`
+
+---
+
+## 📦 Dicas Gerais
+- Não suba arquivos `.env.local` ou `appsettings.*.json` reais, use exemplos e configure no painel do Railway
+- Sempre use URLs HTTPS no frontend em produção
+- Teste endpoints via Postman ou browser
+
+## Referências
+- [Railway Docs](https://docs.railway.app/deploy/)
+- [Deploy .NET](https://docs.railway.app/deploy/deploy-dotnet/)
+- [Deploy Node/Next.js](https://docs.railway.app/deploy/deploy-node/)
 
 ---
 

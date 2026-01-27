@@ -12,8 +12,8 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: LoginRequest) => apiClient.login(data),
     onSuccess: (response) => {
-      setAuth(response.user, response.token)
-      apiClient.setToken(response.token)
+      setAuth(response.user, response.accessToken)
+      apiClient.setToken(response.accessToken)
       toast.success('Login realizado com sucesso!')
       router.push('/dashboard')
     },
@@ -30,8 +30,8 @@ export function useRegister() {
   return useMutation({
     mutationFn: (data: RegisterRequest) => apiClient.register(data),
     onSuccess: (response) => {
-      setAuth(response.user, response.token)
-      apiClient.setToken(response.token)
+      setAuth(response.user, response.accessToken)
+      apiClient.setToken(response.accessToken)
       toast.success('Conta criada com sucesso!')
       router.push('/dashboard')
     },

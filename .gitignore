@@ -19,6 +19,34 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# ============ AstraFuture Custom ============
+# Backend migrations (não versionar arquivos gerados)
+backend-src/**/Migrations/
+# Banco local
+database/*.db
+database/*.sqlite*
+# Arquivos de configuração sensíveis
+backend-src/**/appsettings.*.json
+frontend/.env*
+# Build output
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+# Coverage
+frontend/coverage/
+backend-src/**/TestResults/
+# Logs
+*.log
+logs/
+# IDE
+.idea/
+.vscode/
+# OS
+.DS_Store
+Thumbs.db
+
 ## Visual Studio cache/options
 .vs/
 .vscode/

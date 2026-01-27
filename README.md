@@ -1,375 +1,179 @@
-# 🚀 AstraFuture - Sistema de Agendamentos Multi-Tenant
+# 🚀 AstraFuture - Sistema de Agendamentos
 
-> **Status:** ✅ Semana 1 Completa - 70% do MVP Implementado  
-> **Última atualização:** 16 Janeiro 2026
+Sistema completo de gerenciamento de agendamentos para pequenos e médios negócios. Moderno, seguro e fácil de usar.
 
----
+[![Status](https://img.shields.io/badge/Status-Pronto%20para%20Venda-brightgreen)]()
+[![Backend](https://img.shields.io/badge/Backend-.NET%2010-blue)]()
+[![Frontend](https://img.shields.io/badge/Frontend-Next.js%2015-black)]()
 
-## 📊 Status do Projeto
+## ✨ Funcionalidades
 
-| Componente | Status | Progresso |
-|-----------|--------|-----------|
-| Backend API | ✅ Completo | 100% |
-| Frontend Base | ✅ Completo | 100% |
-| Autenticação | ✅ Completo | 100% |
-| CRUD Appointments | 🟡 Parcial | 50% |
-| Deploy | ⏸️ Pendente | 0% |
-| **TOTAL MVP** | 🟡 Em Progresso | **70%** |
+### ✅ Implementado
+- 🔐 **Autenticação** - Sistema completo de login e registro
+- 📅 **Agendamentos** - CRUD completo com status
+- 👥 **Clientes** - Gestão de clientes com busca
+- 📊 **Dashboard** - Métricas em tempo real
+- 🎨 **Interface Moderna** - Design responsivo e intuitivo
+- 🔒 **Multi-tenancy** - Dados isolados por empresa
+- 🌐 **API RESTful** - Backend completo documentado
 
----
+### 🚧 Em Planejamento
+- 📆 Visualização em calendário
+- 📧 Notificações por email/SMS
+- 💬 WhatsApp Bot
+- 📈 Relatórios e analytics
+- 🎯 Command Palette (Ctrl+K)
 
-## 📋 Documentação Rápida
+## 🛠️ Tecnologias
 
-### 🏃‍♂️ Setup Rápido
-- **[SETUP-FRONTEND.md](./SETUP-FRONTEND.md)** - Como rodar o frontend em 5 minutos
-- **[SETUP-SUPABASE.md](./SETUP-SUPABASE.md)** - Configurar database e auth
+### Backend
+- **.NET 10** - Framework moderno e performático
+- **Clean Architecture** - Separação de responsabilidades
+- **CQRS** com MediatR - Padrão de comandos e queries
+- **Supabase** - Banco de dados PostgreSQL
+- **Dapper** - ORM leve e rápido
+- **JWT** - Autenticação segura
 
-### 📈 Progresso
-- **[ENTREGA-SEMANA-1.md](./ENTREGA-SEMANA-1.md)** - Resumo completo da Semana 1
-- **[PROGRESSO-DIA-5.md](./PROGRESSO-DIA-5.md)** - Detalhes do último dia
-- **[PLANO-EXECUCAO.md](./PLANO-EXECUCAO.md)** - Roadmap completo (11 dias)
+### Frontend
+- **Next.js 15** - React framework com SSR
+- **React 18** - Interface reativa
+- **TailwindCSS** - Design system
+- **React Query** - Gerenciamento de estado server
+- **Radix UI** - Componentes acessíveis
+- **TypeScript** - Tipagem estática
 
-### 🏗️ Arquitetura
-- **[architecture/00-OVERVIEW.md](./architecture/00-OVERVIEW.md)** - Visão geral técnica
-- **[database/schema.sql](./database/schema.sql)** - Schema PostgreSQL com RLS
-
----
-
-## 🚀 Como Executar
+## 🚀 Início Rápido
 
 ### Pré-requisitos
-- ✅ .NET 9.0 SDK
-- ✅ Node.js 18+
-- ✅ Conta Supabase (grátis)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Node.js 18+](https://nodejs.org/)
+- [Conta Supabase](https://supabase.com) (grátis)
 
-### Backend (.NET)
+### 1. Configurar Supabase
 ```bash
+# Criar projeto em https://supabase.com
+# Executar database/schema.sql no SQL Editor
+# Copiar credenciais (Settings > API)
+```
+
+### 2. Backend
+```bash
+# Copiar configurações
+cp backend-src/AstraFuture.Api/appsettings.Development.json.example \
+   backend-src/AstraFuture.Api/appsettings.Development.json
+
+# Editar appsettings.Development.json com suas credenciais
+
+# Executar
 cd backend-src/AstraFuture.Api
 dotnet run
 ```
-Backend em: `http://localhost:5000`
 
-### Frontend (Next.js)
+Backend em: http://localhost:5000
+
+### 3. Frontend
 ```bash
+# Copiar configurações
+cp frontend/.env.local.example frontend/.env.local
+
+# Editar .env.local com suas credenciais
+
+# Instalar e executar
 cd frontend
 npm install
 npm run dev
 ```
-Frontend em: `http://localhost:3000`
 
-### Detalhes Completos
-Veja [SETUP-FRONTEND.md](./SETUP-FRONTEND.md) para instruções detalhadas.
+Frontend em: http://localhost:3000
 
----
+## 📖 Documentação
 
-## 📊 Visão Geral do Projeto
+- **[GUIA-USO.md](GUIA-USO.md)** - Guia completo de uso
+- **[STATUS-PROJETO.md](STATUS-PROJETO.md)** - Status atual e roadmap
+- **[CHECKLIST-DEPLOY.md](CHECKLIST-DEPLOY.md)** - Deploy em produção
+- **[SETUP-SUPABASE.md](SETUP-SUPABASE.md)** - Configuração do banco
+- **[api/README.md](api/README.md)** - Documentação da API
+- **[backend/README.md](backend/README.md)** - Arquitetura do backend
 
-**AstraFuture** é uma plataforma SaaS universal e agnóstica para agendamento e prestação de serviços premium, projetada para escalar infinitamente através de arquitetura multi-tenant.
+## 🎯 Como Usar
 
-### Características Principais
+### 1. Criar Conta
+- Acesse http://localhost:3000
+- Clique em "Criar conta"
+- Preencha nome da empresa, email e senha
+- Login automático
 
-✅ **Multi-tenancy com RLS** - Isolamento garantido via Row-Level Security  
-✅ **Core Agnóstico** - Funciona para qualquer nicho (psicologia, advocacia, construção)  
-✅ **Onboarding Zero Burocracia** - De "Oi" no WhatsApp a dashboard em < 3 minutos  
-✅ **UX Premium** - Micro-interações, optimistic updates, zero formulários longos  
-✅ **Baixa Latência** - Cache em múltiplas camadas (Edge, Redis, Browser)  
+### 2. Cadastrar Clientes
+- Menu lateral > "Clientes"
+- Botão "Novo Cliente"
+- Preencha nome, telefone e email
+- Criar
 
----
+### 3. Criar Agendamentos
+- Menu lateral > "Agendamentos"
+- Botão "Novo Agendamento"
+- Selecione cliente, data/hora e status
+- Criar
 
-## 🏛️ Arquitetura em Alto Nível
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        FRONTEND                              │
-│  Next.js 14 + React + TypeScript + TailwindCSS + ShadcnUI  │
-│                    (Vercel Edge Network)                     │
-└────────────────────┬────────────────────────────────────────┘
-                     │ HTTPS/REST
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     API GATEWAY                              │
-│         Rate Limiting + JWT Validation + CORS               │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    BACKEND API                               │
-│        .NET 8 + ASP.NET Core + Clean Architecture           │
-│                     (Fly.io / AWS)                           │
-└──┬──────────────────┬──────────────────┬────────────────────┘
-   │                  │                  │
-   ▼                  ▼                  ▼
-┌────────┐      ┌─────────┐       ┌──────────┐
-│ Supabase│      │  Redis  │       │   n8n    │
-│PostgreSQL│     │  Cache  │       │Automation│
-│   +RLS  │      │         │       │          │
-└────────┘      └─────────┘       └──────────┘
-```
-
----
-
-## 📁 Estrutura do Monorepo (Proposta)
+## 🏗️ Arquitetura
 
 ```
 astrafuture/
-├── backend/                      # .NET 8 Backend
-│   ├── AstraFuture.Api/              # Web API (Controllers, Middleware)
-│   ├── AstraFuture.Application/      # Use Cases, DTOs, Interfaces
-│   ├── AstraFuture.Domain/           # Entities, Value Objects, Domain Events
-│   ├── AstraFuture.Infrastructure/   # Data Access, External Services
-│   └── AstraFuture.Shared/           # Cross-cutting concerns
+├── backend-src/              # Backend .NET
+│   ├── AstraFuture.Api/      # Controllers e endpoints
+│   ├── AstraFuture.Application/  # Use cases (CQRS)
+│   ├── AstraFuture.Domain/   # Entidades e regras de negócio
+│   ├── AstraFuture.Infrastructure/  # Supabase, repos
+│   └── AstraFuture.Tests/    # Testes unitários
 │
-├── frontend/                     # Next.js 14 Frontend
+├── frontend/                 # Frontend Next.js
 │   ├── src/
-│   │   ├── app/                 # App Router (pages)
-│   │   ├── components/          # UI Components
-│   │   ├── lib/                 # Utilities, API client
-│   │   └── hooks/               # Custom hooks
-│   ├── public/
-│   └── package.json
+│   │   ├── app/             # Páginas (App Router)
+│   │   ├── components/      # Componentes React
+│   │   ├── hooks/           # Custom hooks
+│   │   ├── lib/             # Utilitários
+│   │   └── types/           # TypeScript types
+│   └── public/              # Assets estáticos
 │
-├── database/                     # Database artifacts
-│   ├── schema.sql               # PostgreSQL schema
-│   ├── migrations/              # Migration scripts
-│   └── seeds/                   # Seed data
-│
-├── workflows/                    # n8n workflows
-│   ├── whatsapp-onboarding.json
-│   └── notifications.json
-│
-├── docs/                         # Documentation
-│   ├── architecture/
-│   ├── api/
-│   └── ux-strategy.md
-│
-├── infrastructure/               # IaC (Terraform/Pulumi)
-│   ├── terraform/
-│   └── docker-compose.yml
-│
-└── README.md
+├── database/                # SQL schemas
+└── docs/                    # Documentação
 ```
 
----
+## 📊 Status do Projeto
 
-## 🛠️ Stack Tecnológica Detalhada
+✅ **MVP Completo** - Pronto para uso real
+- Backend: 100%
+- Frontend: 100%
+- CRUD: 100%
+- Auth: 100%
+- Multi-tenancy: 100%
 
-### Backend
-```yaml
-Runtime: .NET 8 (LTS)
-Framework: ASP.NET Core Web API
-Architecture: Clean Architecture + CQRS Light
-ORM: Dapper (queries) + EF Core (migrations)
-Auth: Supabase Auth (JWT)
-Validation: FluentValidation
-Logging: Serilog → Seq
-Testing: xUnit + FluentAssertions + Testcontainers
-```
+Ver [STATUS-PROJETO.md](STATUS-PROJETO.md) para detalhes completos.
 
-### Frontend
-```yaml
-Framework: Next.js 14.1+
-Language: TypeScript 5.3+
-UI: ShadcnUI + Tailwind CSS 3.4+
-Forms: React Hook Form + Zod
-Data Fetching: React Query v5
-Animation: Framer Motion
-State: Zustand (global) + Context (local)
-```
+## 🤝 Contribuindo
 
-### Infraestrutura
-```yaml
-Database: PostgreSQL 15+ (Supabase)
-Cache: Redis 7+ (Upstash)
-Storage: Supabase Storage (S3-compatible)
-CDN: Cloudflare
-Hosting Backend: Fly.io
-Hosting Frontend: Vercel
-Monitoring: Grafana + Prometheus + Sentry
-```
+Este é um projeto MVP. Contribuições são bem-vindas!
 
-### DevOps
-```yaml
-CI/CD: GitHub Actions
-Containers: Docker + Docker Compose
-Secrets: Doppler
-IaC: Terraform (opcional)
-```
-
----
-
-## 🔐 Segurança
-
-### Row-Level Security (RLS)
-Todas as queries são automaticamente filtradas por `tenant_id` através de políticas PostgreSQL.
-
-**Exemplo:**
-```sql
--- Usuários só veem appointments do próprio tenant
-CREATE POLICY "Tenant isolation" ON appointments
-FOR SELECT USING (tenant_id = current_setting('app.tenant_id')::uuid);
-```
-
-### Autenticação
-- **JWT Tokens** emitidos pelo Supabase Auth
-- **Claims**: `user_id`, `tenant_id`, `role`, `permissions`
-- **Refresh Tokens** com rotação automática
-
-### Rate Limiting
-| Tier | Requests/min | Requests/dia |
-|------|--------------|--------------|
-| Free | 100 | 10,000 |
-| Pro | 1,000 | 100,000 |
-| Enterprise | Custom | Custom |
-
----
-
-## 📈 Performance
-
-### Targets
-- **API Latency P95**: < 200ms
-- **First Contentful Paint**: < 1.5s
-- **Time to Interactive**: < 3s
-- **Lighthouse Score**: > 90
-
-### Estratégias
-- ✅ Optimistic Updates (UI instantânea)
-- ✅ Prefetching (React Query)
-- ✅ Edge Caching (Vercel/Cloudflare)
-- ✅ Redis para query results (TTL 5min)
-- ✅ Connection Pooling (PgBouncer)
-
----
-
-## 🧪 Testing Strategy
-
-### Backend
-```bash
-# Unit tests (Domain + Application)
-dotnet test --filter Category=Unit
-
-# Integration tests (API + Database)
-dotnet test --filter Category=Integration
-
-# E2E tests (usando Testcontainers)
-dotnet test --filter Category=E2E
-```
-
-### Frontend
-```bash
-# Unit tests (Components)
-npm run test
-
-# E2E tests (Playwright)
-npm run test:e2e
-
-# Visual regression (Chromatic)
-npm run test:visual
-```
-
-### Coverage Target
-- Backend: > 80%
-- Frontend: > 70%
-
----
-
-## 🚢 Deployment
-
-### Ambientes
-
-```
-Development → localhost (Docker Compose)
-Staging     → staging.astrafuture.app
-Production  → app.astrafuture.app
-```
-
-### CI/CD Pipeline
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: dotnet test
-      - run: npm test
-  
-  deploy-backend:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: superfly/flyctl-actions@v1
-        with:
-          args: deploy --config backend/fly.toml
-  
-  deploy-frontend:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-```
-
----
-
-## 📚 Próximos Passos
-
-### Fase 1: MVP (4 semanas)
-- [ ] Setup da infraestrutura (database, auth, hosting)
-- [ ] Backend: Endpoints core (tenants, users, appointments)
-- [ ] Frontend: Dashboard básico + Calendar
-- [ ] Onboarding: Flow WhatsApp (n8n)
-
-### Fase 2: Premium Features (4 semanas)
-- [ ] UX: Micro-interações + Optimistic updates
-- [ ] Notificações multi-canal (email, SMS, WhatsApp)
-- [ ] Analytics & Relatórios
-- [ ] Payment integration (Stripe)
-
-### Fase 3: Scale (4 semanas)
-- [ ] Performance optimization
-- [ ] Multi-location support
-- [ ] Advanced business rules engine
-- [ ] Mobile app (React Native)
-
----
-
-## 🤝 Contributing
-
-### Workflow
-1. Fork o repositório
-2. Crie uma branch (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Add nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
 5. Abra um Pull Request
 
-### Code Style
-- Backend: [Microsoft C# Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- Frontend: [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
+## 📝 Licença
 
----
+Este projeto é privado. Todos os direitos reservados.
 
 ## 📞 Suporte
 
-- **Email**: dev@astrafuture.app
-- **Discord**: [discord.gg/astrafuture](https://discord.gg/astrafuture)
-- **Docs**: [docs.astrafuture.app](https://docs.astrafuture.app)
+Para dúvidas ou problemas:
+1. Verifique a [documentação](docs/)
+2. Consulte o [GUIA-USO.md](GUIA-USO.md)
+3. Veja o [STATUS-PROJETO.md](STATUS-PROJETO.md)
 
 ---
 
-## 📄 Licença
+**AstraFuture** - Transformando a gestão de agendamentos  
+Desenvolvido com ❤️ usando .NET e Next.js
 
-MIT License - veja [LICENSE](LICENSE) para detalhes.
-
----
-
-**Desenvolvido com ❤️ para transformar agendamentos em experiências premium.**
+**Última atualização:** 27 de Janeiro de 2026

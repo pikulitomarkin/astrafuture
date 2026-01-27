@@ -5,7 +5,10 @@ import type {
   LoginRequest, 
   RegisterRequest,
   Customer,
-  Resource
+  Resource,
+  ApiKey,
+  CreateApiKeyRequest,
+  WebhookUrls
 } from '@/types'
 
 class ApiClient {
@@ -111,9 +114,47 @@ class ApiClient {
     return response.data
   }
 
+  async updateCustomer(id: string, data: Partial<Customer>): Promise<Customer> {
+    const response = await this.client.put<Customer>(`/customers/${id}`, data)
+    return response.data
+  }
+
+  async deleteCustomer(id: string): Promise<void> {
+    await this.client.delete(`/customers/${id}`)
+  }
+
   // Resources
   async getResources(): Promise<Resource[]> {
     const response = await this.client.get<Resource[]>('/resources')
+    return response.data
+  }
+
+  async getResource(id: string): Promise<Resource> {
+    const response = await this.client.get<Resource>(`/resources/${id}`)
+    return response.data
+  }
+
+  // API Keys
+  async getApiKeys(): Promise<ApiKey[]> {
+    const response = await this.client.get<ApiKey[]>('/apikeys')
+    return response.data
+  }
+
+  async createApiKey(data: CreateApiKeyRequest): Promise<ApiKey> {
+    const response = await this.client.post<ApiKey>('/apikeys', data)
+    return response.data
+  }
+
+  async updateApiKey(id: string, data: { name: string; description?: string; isActive: boolean }): Promise<void> {
+    await this.client.put(`/apikeys/${id}`, data)
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    await this.client.delete(`/apikeys/${id}`)
+  }
+
+  async getWebhookUrls(): Promise<WebhookUrls> {
+    const response = await this.client.get<WebhookUrls>('/apikeys/webhook-url')
     return response.data
   }
 }

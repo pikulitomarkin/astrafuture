@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Calendar, Home, Users, LogOut } from 'lucide-react'
+import { Calendar, Home, Users, LogOut, Plug } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,11 @@ const menuItems = [
     title: 'Clientes',
     href: '/dashboard/customers',
     icon: Users,
+  },
+  {
+    title: 'Integrações',
+    href: '/dashboard/integrations',
+    icon: Plug,
   },
 ]
 
