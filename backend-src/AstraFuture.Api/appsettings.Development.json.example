@@ -1,0 +1,19 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Supabase": {
+    "Url": "https://SEU-PROJETO.supabase.co",
+    "ServiceRoleKey": "sua-service-role-key-aqui",
+    "AnonKey": "sua-anon-key-aqui"
+  },
+  "Jwt": {
+    "Secret": "sua-chave-secreta-minimo-32-caracteres-para-jwt-aqui",
+    "Issuer": "AstraFuture",
+    "Audience": "AstraFuture",
+    "ExpirationMinutes": 1440
+  }
+}

@@ -1,8 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AstraFuture.Api.Controllers;
 
@@ -69,18 +72,27 @@ public class AuthController : ControllerBase
 
             var result = JsonSerializer.Deserialize<JsonElement>(responseBody);
             
+            // Extrair user ID e email do resultado do Supabase
+            var userId = result.TryGetProperty("user", out var user) && user.TryGetProperty("id", out var id) 
+                ? id.GetString() : Guid.NewGuid().ToString();
+            
+            var tenantId = request.TenantId?.ToString() ?? Guid.NewGuid().ToString();
+            
+            // Gerar nosso próprio JWT
+            var token = GenerateJwtToken(userId!, request.Email, tenantId);
+            
             _logger.LogInformation("User registered: {Email}", request.Email);
 
             return Ok(new AuthResponse
             {
-                AccessToken = result.TryGetProperty("access_token", out var at) ? at.GetString() : null,
-                RefreshToken = result.TryGetProperty("refresh_token", out var rt) ? rt.GetString() : null,
-                ExpiresIn = result.TryGetProperty("expires_in", out var ei) ? ei.GetInt32() : 0,
+                AccessToken = token,
+                RefreshToken = null,
+                ExpiresIn = 86400, // 24 horas
                 User = new UserInfo
                 {
-                    Id = result.TryGetProperty("user", out var user) && user.TryGetProperty("id", out var id) 
-                        ? id.GetString() : null,
-                    Email = request.Email
+                    Id = userId,
+                    Email = request.Email,
+                    TenantId = Guid.TryParse(tenantId, out var tid) ? tid : null
                 }
             });
         }
@@ -131,17 +143,33 @@ public class AuthController : ControllerBase
 
             var result = JsonSerializer.Deserialize<JsonElement>(responseBody);
             
+            // Extrair informações do usuário
+            var userId = result.GetProperty("user").GetProperty("id").GetString()!;
+            var email = result.GetProperty("user").GetProperty("email").GetString()!;
+            
+            // Tentar pegar tenant_id dos metadados do usuário
+            var tenantId = Guid.NewGuid().ToString(); // Default
+            if (result.GetProperty("user").TryGetProperty("user_metadata", out var metadata) &&
+                metadata.TryGetProperty("tenant_id", out var tidElement))
+            {
+                tenantId = tidElement.GetString() ?? tenantId;
+            }
+            
+            // Gerar nosso próprio JWT
+            var token = GenerateJwtToken(userId, email, tenantId);
+            
             _logger.LogInformation("User logged in: {Email}", request.Email);
 
             return Ok(new AuthResponse
             {
-                AccessToken = result.GetProperty("access_token").GetString(),
-                RefreshToken = result.GetProperty("refresh_token").GetString(),
-                ExpiresIn = result.GetProperty("expires_in").GetInt32(),
+                AccessToken = token,
+                RefreshToken = null,
+                ExpiresIn = 86400, // 24 horas
                 User = new UserInfo
                 {
-                    Id = result.GetProperty("user").GetProperty("id").GetString(),
-                    Email = result.GetProperty("user").GetProperty("email").GetString()
+                    Id = userId,
+                    Email = email,
+                    TenantId = Guid.TryParse(tenantId, out var tidGuid) ? tidGuid : null
                 }
             });
         }
@@ -150,6 +178,37 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Error during login");
             return StatusCode(500, new { error = "Erro interno no login" });
         }
+    }
+
+    private string GenerateJwtToken(string userId, string email, string tenantId)
+    {
+        var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET") 
+            ?? _configuration["Supabase:JwtSecret"]
+            ?? throw new InvalidOperationException("JWT Secret not configured");
+
+        var key = Encoding.ASCII.GetBytes(jwtSecret);
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Email, email),
+                new Claim("sub", userId),
+                new Claim("email", email),
+                new Claim("tenant_id", tenantId)
+            }),
+            Expires = DateTime.UtcNow.AddDays(1),
+            Issuer = "AstraFuture",
+            Audience = "AstraFuture",
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 
     /// <summary>

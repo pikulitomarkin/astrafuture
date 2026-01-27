@@ -12,8 +12,11 @@ public static class SupabaseAuthExtensions
         this IServiceCollection services, 
         IConfiguration configuration)
     {
-        var supabaseUrl = configuration["Supabase:Url"]
-            ?? throw new InvalidOperationException("Supabase:Url not configured");
+        var jwtSecret = configuration["Supabase:JwtSecret"] 
+            ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET")
+            ?? throw new InvalidOperationException("JWT Secret not configured");
+
+        var key = Encoding.ASCII.GetBytes(jwtSecret);
 
         services.AddAuthentication(options =>
         {
@@ -22,24 +25,21 @@ public static class SupabaseAuthExtensions
         })
         .AddJwtBearer(options =>
         {
-            // Usar JWKS endpoint do Supabase para validar tokens ES256
-            options.Authority = $"{supabaseUrl}/auth/v1";
-            options.Audience = "authenticated";
+            options.RequireHttpsMetadata = false; // Permite HTTP em desenvolvimento
+            options.SaveToken = true;
             
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true,
-                ValidIssuer = $"{supabaseUrl}/auth/v1",
-                ValidateAudience = true,
-                ValidAudience = "authenticated",
                 ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = "AstraFuture",
+                ValidateAudience = true,
+                ValidAudience = "AstraFuture",
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(1)
+                ClockSkew = TimeSpan.FromMinutes(5)
             };
 
-            // Configurar para buscar JWKS automaticamente
-            options.RequireHttpsMetadata = true;
-            
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>
