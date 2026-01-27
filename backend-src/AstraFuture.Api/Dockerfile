@@ -6,7 +6,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copiar todos os arquivos de projeto
+# Copiar todos os arquivos de projeto (paths relativos a backend-src/)
 COPY ["AstraFuture.Api/AstraFuture.Api.csproj", "AstraFuture.Api/"]
 COPY ["AstraFuture.Application/AstraFuture.Application.csproj", "AstraFuture.Application/"]
 COPY ["AstraFuture.Domain/AstraFuture.Domain.csproj", "AstraFuture.Domain/"]
