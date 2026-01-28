@@ -18,8 +18,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copiar arquivos buildados
-COPY --from=builder /app/public ./public
+# Copiar arquivos buildados do Next.js standalone
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
