@@ -50,4 +50,39 @@ pip install -r requirements.txt
 
 ## Deploy
 
-O bot pode ser implantado no Railway junto com o backend e frontend.
+### Railway (Recomendado)
+
+Consulte o guia completo: **[DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md)**
+
+**Resumo rápido:**
+1. Crie novo projeto no Railway
+2. Deploy do GitHub: `astrafuture`
+3. Settings → Root Directory: `whatsapp-bot`
+4. Adicione variáveis de ambiente
+5. Configure webhook no provedor WhatsApp
+
+### Docker Local
+
+```bash
+cd whatsapp-bot
+
+# Build
+docker build -t astra-bot .
+
+# Run
+docker run -d \
+  --name astra-bot \
+  -p 5000:5000 \
+  --env-file .env \
+  astra-bot
+```
+
+### Manual (desenvolvimento)
+
+```bash
+cd whatsapp-bot
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python src/bot.py
+```
