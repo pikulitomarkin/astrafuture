@@ -15,8 +15,22 @@ class ApiClient {
   private client: AxiosInstance
 
   constructor() {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL
+
+    if (!baseURL) {
+      // Aviso explícito para facilitar debugging em produção
+      if (typeof window !== 'undefined') {
+        console.error(
+          'ERROR: NEXT_PUBLIC_API_URL não está definida no build. O frontend está usando fallback para http://localhost:5000/api.\n' +
+            'Ação: verifique as Variables do serviço Frontend no Railway e faça um rebuild (clear build cache ou adicione FORCE_REBUILD=1).'
+        )
+      } else {
+        console.warn('NEXT_PUBLIC_API_URL não definida no build.')
+      }
+    }
+
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+      baseURL: baseURL || 'http://localhost:5000/api',
       headers: {
         'Content-Type': 'application/json',
       },
