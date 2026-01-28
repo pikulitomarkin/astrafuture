@@ -11,9 +11,9 @@ COPY . .
 # Debug: Ver o que foi copiado após COPY
 RUN pwd && ls -la && find . -name "*.csproj" -type f
 
-# Restaurar e publicar
-RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
-RUN dotnet publish "AstraFuture.Api/AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# Restaurar e publicar - usar path correto baseado no que foi copiado
+RUN dotnet restore "./AstraFuture.Api.csproj"
+RUN dotnet publish "./AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
