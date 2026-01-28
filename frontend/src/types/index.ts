@@ -41,6 +41,7 @@ export interface User {
   id: string
   email: string
   tenantId?: string
+  businessName?: string
 }
 
 export interface AuthResponse {

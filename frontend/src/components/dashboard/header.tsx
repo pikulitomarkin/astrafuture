@@ -21,8 +21,8 @@ export function Header({ title, description }: HeaderProps) {
         </div>
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <p className="text-sm text-[#333333]">Bem-vindo,</p>
-            <p className="font-semibold text-[#075E54]">{user?.email}</p>
+            <p className="text-sm text-[#333333]">{user?.businessName ? 'Negócio:' : 'Bem-vindo,'}</p>
+            <p className="font-semibold text-[#075E54]">{user?.businessName || user?.email}</p>
           </div>
         </div>
       </div>
