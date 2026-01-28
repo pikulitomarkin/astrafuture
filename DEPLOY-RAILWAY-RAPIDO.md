@@ -9,9 +9,9 @@ O Railway precisa saber qual pasta buildar. Você tem 2 opções:
 #### Serviço 1: Backend
 1. No Railway, crie "New Service" → "Deploy from GitHub repo"
 2. Escolha o repositório `astrafuture`
-3. **Settings** → **Root Directory** → `backend-src`
+3. **Settings** → **Root Directory** → `` (vazio - raiz do projeto)
 4. **Settings** → **Builder** → Selecione `Dockerfile` (não deixe em Auto-detect)
-5. Railway vai usar o `Dockerfile` em `backend-src/Dockerfile`
+5. Railway vai usar o `Dockerfile` na raiz do projeto
 
 **Variáveis de Ambiente:**
 ```bash
