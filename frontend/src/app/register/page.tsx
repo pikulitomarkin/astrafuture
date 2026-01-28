@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { useRegister } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,13 +24,10 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-center">
-            <Image 
+            <img 
               src="/logo.svg" 
               alt="Astra Agenda" 
-              width={200} 
-              height={80}
-              className="w-auto h-20"
-              priority
+              className="h-20 w-auto"
             />
           </div>
           <CardDescription className="text-center text-[#333333]">

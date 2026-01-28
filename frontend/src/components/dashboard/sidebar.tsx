@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Calendar, Home, Users, LogOut, Plug } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -40,13 +39,10 @@ export function Sidebar() {
       {/* Header com Logo */}
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex flex-col space-y-2">
-          <Image 
+          <img 
             src="/logo.svg" 
             alt="Astra Agenda" 
-            width={180} 
-            height={60}
             className="w-full h-auto"
-            priority
           />
           {user && (
             <p className="text-xs text-[#333333] text-center">{user.email}</p>
