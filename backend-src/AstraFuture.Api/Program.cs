@@ -37,7 +37,23 @@ var supabaseUrl = builder.Configuration["Supabase:Url"]
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET");
+
+// Validate JWT secret length: must be at least 32 characters (>= 256 bits)
+if (!string.IsNullOrEmpty(jwtSecret) && jwtSecret.Length < 32)
+{
+    Console.WriteLine("[AUTH] WARNING: SUPABASE_JWT_SECRET is configured but too short ({0} chars). JWT auth will be disabled. Provide a secret with at least 32 characters.", jwtSecret.Length);
+    jwtSecret = null; // disable auth to avoid runtime signing errors
+}
+
 var useAuth = !string.IsNullOrEmpty(jwtSecret);
+if (useAuth)
+{
+    Console.WriteLine("[AUTH] JWT Authentication will be ENABLED (secret length OK)");
+}
+else
+{
+    Console.WriteLine("[AUTH] JWT Authentication DISABLED (SUPABASE_JWT_SECRET not set or invalid)");
+}
 
 // Connection string do Supabase PostgreSQL - usar da configuração
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

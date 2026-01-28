@@ -201,9 +201,16 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(string userId, string email, string tenantId)
     {
-        var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET") 
+        var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET")
             ?? _configuration["Supabase:JwtSecret"]
             ?? throw new InvalidOperationException("JWT Secret not configured");
+
+        // Validate secret length to avoid cryptic runtime errors from token library
+        if (jwtSecret.Length < 32)
+        {
+            _logger.LogError("JWT Secret too short ({Length} chars). It must be at least 32 characters.", jwtSecret.Length);
+            throw new InvalidOperationException("JWT Secret is too short. Set SUPABASE_JWT_SECRET with at least 32 characters.");
+        }
 
         var key = Encoding.ASCII.GetBytes(jwtSecret);
         var tokenHandler = new JwtSecurityTokenHandler();
