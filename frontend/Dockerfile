@@ -2,9 +2,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copiar package files explicitamente
-COPY package.json ./
-COPY package-lock.json ./
+# Copiar package files explicitamente (sintaxe JSON evita ambiguidade)
+COPY ["package.json", "package-lock.json", "./"]
+# Debug: listar arquivos para confirmar que package-lock.json está disponível
+RUN ls -la /app && test -f package-lock.json && echo "package-lock.json exists" || (echo "package-lock.json NOT FOUND" && exit 1)
 
 # Instalar dependências
 RUN npm ci --prefer-offline --no-audit
