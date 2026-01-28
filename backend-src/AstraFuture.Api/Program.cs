@@ -11,18 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 // CONFIGURATION
 // =====================================================
 
-// Carrega .env.local (desenvolvimento)
-var envFile = Path.Combine(Directory.GetParent(builder.Environment.ContentRootPath)!.Parent!.FullName, ".env.local");
-if (File.Exists(envFile))
+// Carrega .env.local (desenvolvimento) - com null-safety para produção
+var parentDir = Directory.GetParent(builder.Environment.ContentRootPath);
+if (parentDir?.Parent != null)
 {
-    foreach (var line in File.ReadAllLines(envFile))
+    var envFile = Path.Combine(parentDir.Parent.FullName, ".env.local");
+    if (File.Exists(envFile))
     {
-        if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
-        
-        var parts = line.Split('=', 2);
-        if (parts.Length == 2)
+        foreach (var line in File.ReadAllLines(envFile))
         {
-            Environment.SetEnvironmentVariable(parts[0].Trim(), parts[1].Trim());
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+            
+            var parts = line.Split('=', 2);
+            if (parts.Length == 2)
+            {
+                Environment.SetEnvironmentVariable(parts[0].Trim(), parts[1].Trim());
+            }
         }
     }
 }
