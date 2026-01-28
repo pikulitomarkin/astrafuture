@@ -1,0 +1,50 @@
+# 🤖 WhatsApp Bot - Astra Agenda
+
+Bot Python para processamento automático de agendamentos via WhatsApp.
+
+## Funcionalidades
+
+- ✅ Receber mensagens do WhatsApp via webhook
+- ✅ Processar solicitações de agendamento
+- ✅ Listar horários disponíveis
+- ✅ Confirmar/cancelar agendamentos
+- ✅ Enviar lembretes automáticos
+- ✅ Integração com API backend
+
+## Estrutura
+
+```
+whatsapp-bot/
+├── src/
+│   ├── bot.py              # Bot principal
+│   ├── handlers/           # Handlers de mensagens
+│   ├── services/           # Serviços (API, WhatsApp)
+│   ├── utils/              # Utilitários
+│   └── config.py           # Configurações
+├── requirements.txt        # Dependências Python
+├── .env.example           # Exemplo de variáveis
+├── Dockerfile             # Container Docker
+└── README.md
+```
+
+## Instalação
+
+```bash
+cd whatsapp-bot
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate     # Windows
+
+pip install -r requirements.txt
+```
+
+## Configuração
+
+1. Copie `.env.example` para `.env`
+2. Configure as variáveis de ambiente
+3. Execute o bot: `python src/bot.py`
+
+## Deploy
+
+O bot pode ser implantado no Railway junto com o backend e frontend.

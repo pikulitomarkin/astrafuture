@@ -1,0 +1,30 @@
+# Framework web
+flask==3.0.0
+gunicorn==21.2.0
+
+# Cliente HTTP
+requests==2.31.0
+httpx==0.26.0
+
+# WhatsApp API
+twilio==8.11.1
+
+# Processamento de datas
+python-dateutil==2.8.2
+pytz==2024.1
+
+# Variáveis de ambiente
+python-dotenv==1.0.0
+
+# Validação de dados
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Logging
+structlog==24.1.0
+
+# Scheduling (para lembretes)
+apscheduler==3.10.4
+
+# Database (opcional - cache local)
+redis==5.0.1
