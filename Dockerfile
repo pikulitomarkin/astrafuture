@@ -1,4 +1,4 @@
-# Dockerfile para AstraFuture Backend (.NET 10) - Raiz do projeto
+# Dockerfile para AstraFuture Backend (.NET 10) - Raiz do projeto - v2
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
