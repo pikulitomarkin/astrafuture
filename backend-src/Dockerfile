@@ -5,6 +5,9 @@ WORKDIR /src
 # Copiar todo o projeto de uma vez
 COPY . .
 
+# Debug: Ver o que foi copiado
+RUN ls -la && ls -la AstraFuture.Api/ || echo "AstraFuture.Api não existe"
+
 # Restaurar e publicar
 RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
 RUN dotnet publish "AstraFuture.Api/AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
