@@ -10,7 +10,8 @@ O Railway precisa saber qual pasta buildar. Você tem 2 opções:
 1. No Railway, crie "New Service" → "Deploy from GitHub repo"
 2. Escolha o repositório `astrafuture`
 3. **Settings** → **Root Directory** → `backend-src`
-4. Railway vai detectar o `Dockerfile` em `backend-src/AstraFuture.Api/Dockerfile`
+4. **Settings** → **Builder** → Selecione `Dockerfile` (não deixe em Auto-detect)
+5. Railway vai usar o `Dockerfile` em `backend-src/Dockerfile`
 
 **Variáveis de Ambiente:**
 ```bash
@@ -42,32 +43,28 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 
 ## 🐳 Dockerfiles
 
-### Backend: `backend-src/AstraFuture.Api/Dockerfile`
+### Backend: `backend-src/Dockerfile`
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
+# Dockerfile para AstraFuture Backend (.NET 10)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ["AstraFuture.Api/AstraFuture.Api.csproj", "AstraFuture.Api/"]
-COPY ["AstraFuture.Application/AstraFuture.Application.csproj", "AstraFuture.Application/"]
-COPY ["AstraFuture.Domain/AstraFuture.Domain.csproj", "AstraFuture.Domain/"]
-COPY ["AstraFuture.Infrastructure/AstraFuture.Infrastructure.csproj", "AstraFuture.Infrastructure/"]
-COPY ["AstraFuture.Shared/AstraFuture.Shared.csproj", "AstraFuture.Shared/"]
-
-RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
-
+# Copiar todo o projeto de uma vez
 COPY . .
-WORKDIR "/src/AstraFuture.Api"
-RUN dotnet publish "AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+# Restaurar e publicar
+RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
+RUN dotnet publish "AstraFuture.Api/AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
+
+# Copiar arquivos publicados
 COPY --from=build /app/publish .
 
+# Railway usa a variável PORT
 ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "AstraFuture.Api.dll"]
 ```
@@ -114,8 +111,9 @@ CMD ["node", "server.js"]
 **Erro: "Railpack could not determine how to build"**
 → Configure o Root Directory nas Settings do serviço
 
-**Erro: Build falhou no .NET**
-→ Verifique se o Dockerfile está em `backend-src/AstraFuture.Api/Dockerfile`
+**Erro: "Dockerfile does not exist" ou Railpack errors**
+→ Nas Settings do serviço, vá em **Builder** e selecione `Dockerfile` manualmente
+→ O Dockerfile está em `backend-src/Dockerfile` (root do backend-src)
 
 **Erro: Build falhou no Next.js**
 → Verifique se o Dockerfile está em `frontend/Dockerfile`
