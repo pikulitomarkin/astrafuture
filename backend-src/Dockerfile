@@ -2,11 +2,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Debug: Ver o que foi copiado
+RUN pwd && ls -la && find . -name "*.csproj" -type f
+
 # Copiar todo o projeto de uma vez
 COPY . .
 
-# Debug: Ver o que foi copiado
-RUN ls -la && ls -la AstraFuture.Api/ || echo "AstraFuture.Api não existe"
+# Debug: Ver o que foi copiado após COPY
+RUN pwd && ls -la && find . -name "*.csproj" -type f
 
 # Restaurar e publicar
 RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
