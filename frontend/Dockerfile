@@ -13,8 +13,11 @@ RUN if [ -f package.json ]; then echo "package.json at root"; \
 # Instalar dependências
 RUN npm ci --prefer-offline --no-audit
 
-# Garantir que a variável de build NEXT_PUBLIC_API_URL exista (falha explicitamente se ausente)
-RUN if [ -z "$NEXT_PUBLIC_API_URL" ]; then echo "ERROR: NEXT_PUBLIC_API_URL is not set. Set it in Railway variables and clear build cache." && exit 1; else echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL"; fi
+# Tornar NEXT_PUBLIC_API_URL um ARG com valor padrão (evita problemas se Railway não passar a variável durante o build)
+ARG NEXT_PUBLIC_API_URL=https://astrafuture-production.up.railway.app/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Mostrar valor durante o build para facilitar debug
+RUN echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL"
 
 # Build Next.js
 RUN npm run build
