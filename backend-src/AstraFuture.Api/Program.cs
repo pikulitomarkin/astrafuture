@@ -31,14 +31,17 @@ if (parentDir?.Parent != null)
     }
 }
 
-var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL") 
+var supabaseUrl = builder.Configuration["Supabase:Url"] 
+    ?? Environment.GetEnvironmentVariable("SUPABASE_URL")
     ?? throw new InvalidOperationException("SUPABASE_URL não configurada");
 
-var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET");
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET");
 var useAuth = !string.IsNullOrEmpty(jwtSecret);
 
-// Connection string do Supabase PostgreSQL
-var connectionString = "Host=db.alxtzjmtclopraayehfg.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=JGa8QltC28m9zBzP;SSL Mode=Require;Trust Server Certificate=true";
+// Connection string do Supabase PostgreSQL - usar da configuração
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Host=db.alxtzjmtclopraayehfg.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=JGa8QltC28m9zBzP;SSL Mode=Require;Trust Server Certificate=true";
 
 // Adiciona configurações ao IConfiguration para uso posterior
 builder.Configuration["Supabase:Url"] = supabaseUrl;
