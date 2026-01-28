@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useLogin } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LoginPage() {
@@ -23,13 +23,15 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#25D366]/10 to-[#075E54]/10 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg">
-              <Calendar className="h-8 w-8 text-white" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-[#075E54]">
-              Astra Agenda
-            </CardTitle>
+          <div className="flex items-center justify-center">
+            <Image 
+              src="/logo.svg" 
+              alt="Astra Agenda" 
+              width={200} 
+              height={80}
+              className="w-auto h-20"
+              priority
+            />
           </div>
           <CardDescription className="text-center text-[#333333]">
             Entre com suas credenciais para acessar o sistema
