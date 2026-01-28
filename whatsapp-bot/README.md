@@ -5,11 +5,14 @@ Bot Python para processamento automático de agendamentos via WhatsApp.
 ## Funcionalidades
 
 - ✅ Receber mensagens do WhatsApp via webhook
+- ✅ Suporte a **Twilio** (API Oficial WhatsApp)
+- ✅ Suporte a **Evolution API** (Open Source)
 - ✅ Processar solicitações de agendamento
 - ✅ Listar horários disponíveis
 - ✅ Confirmar/cancelar agendamentos
 - ✅ Enviar lembretes automáticos
 - ✅ Integração com API backend
+- ✅ Arquitetura flexível com abstração de provedores
 
 ## Estrutura
 

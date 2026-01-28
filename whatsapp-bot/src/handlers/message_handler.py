@@ -13,8 +13,9 @@ logger = logging.getLogger(__name__)
 class MessageHandler:
     """Processa mensagens recebidas do WhatsApp"""
     
-    def __init__(self, api_client: APIClient):
+    def __init__(self, api_client: APIClient, whatsapp_provider=None):
         self.api = api_client
+        self.whatsapp_provider = whatsapp_provider
         self.user_sessions: Dict[str, Dict] = {}  # Cache de sessões de usuário
     
     def process_message(self, message: str, from_number: str) -> str:

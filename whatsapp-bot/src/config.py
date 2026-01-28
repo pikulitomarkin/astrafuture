@@ -20,6 +20,12 @@ class Settings(BaseSettings):
         description="Chave de API para autenticação"
     )
     
+    # WhatsApp Provider
+    whatsapp_provider: str = Field(
+        default="twilio",
+        description="Provedor WhatsApp: 'twilio' ou 'evolution'"
+    )
+    
     # Twilio WhatsApp
     twilio_account_sid: str = Field(
         default="",
@@ -32,6 +38,20 @@ class Settings(BaseSettings):
     twilio_whatsapp_number: str = Field(
         default="whatsapp:+14155238886",
         description="Número WhatsApp do Twilio"
+    )
+    
+    # Evolution API
+    evolution_api_url: str = Field(
+        default="",
+        description="URL base da Evolution API"
+    )
+    evolution_api_key: str = Field(
+        default="",
+        description="API Key da Evolution API"
+    )
+    evolution_instance_name: str = Field(
+        default="",
+        description="Nome da instância Evolution API"
     )
     
     # Servidor

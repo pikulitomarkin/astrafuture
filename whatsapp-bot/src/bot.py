@@ -3,11 +3,13 @@ Bot WhatsApp - Astra Agenda
 Processa mensagens e gerencia agendamentos via WhatsApp
 """
 import logging
+import asyncio
 from flask import Flask, request, jsonify
-from twilio.twiml.messaging_response import MessagingResponse
 from config import settings
 from handlers.message_handler import MessageHandler
 from services.api_client import APIClient
+from services.twilio_provider import TwilioProvider
+from services.evolution_provider import EvolutionProvider
 
 # Configurar logging
 logging.basicConfig(
@@ -22,7 +24,24 @@ app.config['SECRET_KEY'] = settings.secret_key
 
 # Inicializar serviços
 api_client = APIClient(settings.api_base_url, settings.api_key)
-message_handler = MessageHandler(api_client)
+
+# Inicializar provedor WhatsApp baseado na configuração
+if settings.whatsapp_provider == 'evolution':
+    logger.info("Usando Evolution API como provedor WhatsApp")
+    whatsapp_provider = EvolutionProvider(
+        base_url=settings.evolution_api_url,
+        api_key=settings.evolution_api_key,
+        instance_name=settings.evolution_instance_name
+    )
+else:
+    logger.info("Usando Twilio como provedor WhatsApp")
+    whatsapp_provider = TwilioProvider(
+        account_sid=settings.twilio_account_sid,
+        auth_token=settings.twilio_auth_token,
+        whatsapp_number=settings.twilio_whatsapp_number
+    )
+
+message_handler = MessageHandler(api_client, whatsapp_provider)
 
 
 @app.route('/health', methods=['GET'])
@@ -38,30 +57,71 @@ def health_check():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     """
-    Webhook para receber mensagens do WhatsApp via Twilio
+    Webhook universal para receber mensagens do WhatsApp
+    Suporta Twilio e Evolution API
     """
     try:
-        # Extrair dados da mensagem
-        incoming_msg = request.values.get('Body', '').strip()
-        from_number = request.values.get('From', '')
+        # Determinar tipo de webhook baseado no provider
+        if settings.whatsapp_provider == 'evolution':
+            # Evolution API envia JSON
+            data = request.get_json() or {}
+            logger.info(f"Evolution webhook recebido: {data.get('event', 'unknown')}")
+            
+            # Validar webhook
+            webhook_data = {
+                'headers': dict(request.headers),
+                'body': data
+            }
+            if not whatsapp_provider.validate_webhook(webhook_data):
+                logger.warning("Evolution webhook inválido")
+                return jsonify({'error': 'Unauthorized'}), 401
+            
+            # Parsear mensagem
+            msg_data = whatsapp_provider.parse_incoming_message(data)
+            
+        else:
+            # Twilio envia form data
+            logger.info(f"Twilio webhook recebido de {request.values.get('From', '')}")
+            msg_data = whatsapp_provider.parse_incoming_message(dict(request.values))
         
-        logger.info(f"Mensagem recebida de {from_number}: {incoming_msg}")
+        incoming_msg = msg_data.get('message', '')
+        from_number = msg_data.get('from_number', '')
         
-        # Processar mensagem
-        response_text = message_handler.process_message(incoming_msg, from_number)
+        if not incoming_msg or not from_number:
+    Suporta Twilio e Evolution API
+    """
+    try:
+        data = request.get_json()
+        to_number = data.get('to')
+        message = data.get('message')
+        media_url = data.get('media_url')
         
-        # Criar resposta TwiML
-        resp = MessagingResponse()
-        resp.message(response_text)
+        if not to_number or not message:
+            return jsonify({'error': 'Missing to or message'}), 400
         
-        return str(resp), 200
+        # Enviar mensagem usando o provider configurado
+        async def send():
+            if media_url:
+                return await whatsapp_provider.send_media(to_number, media_url, message)
+            else:
+                return await whatsapp_provider.send_message(to_number, message)
+        
+        result = asyncio.run(send())
+        
+        logger.info(f"Mensagem enviada para {to_number} via {settings.whatsapp_provider}")
+        
+        return jsonify(result), 200 if result.get('success') else 5eturn str(resp), 200
         
     except Exception as e:
         logger.error(f"Erro ao processar webhook: {str(e)}", exc_info=True)
         
-        resp = MessagingResponse()
-        resp.message("❌ Desculpe, ocorreu um erro. Tente novamente mais tarde.")
-        return str(resp), 200
+        if settings.whatsapp_provider == 'evolution':
+            return jsonify({'error': 'Internal error'}), 500
+        else:
+            from twilio.twiml.messaging_response import MessagingResponse
+            resp = MessagingResponse()
+            resp.message("❌ Desculpe, ocorreu um erro. Tente novamente mais tarde.")
+            return str(resp), 200
 
 
 @app.route('/send', methods=['POST'])
