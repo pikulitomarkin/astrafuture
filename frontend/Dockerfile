@@ -34,6 +34,8 @@ ENV PORT=3000
 # Copiar arquivos buildados do Next.js standalone
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+# Copiar pasta public com o logo e outros assets estáticos
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
