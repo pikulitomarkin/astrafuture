@@ -27,6 +27,15 @@ public class AuthController : ControllerBase
         _httpClient = httpClientFactory.CreateClient("Supabase");
     }
 
+    // Lê a Supabase anon key aceitando diferentes convenções de nome
+    private string GetSupabaseAnonKey()
+    {
+        return Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY")
+            ?? Environment.GetEnvironmentVariable("Supabase__AnonKey")
+            ?? _configuration["Supabase:AnonKey"]
+            ?? string.Empty;
+    }
+
     /// <summary>
     /// Registra um novo usuário via Supabase Auth
     /// </summary>
@@ -39,7 +48,12 @@ public class AuthController : ControllerBase
         try
         {
             var supabaseUrl = _configuration["Supabase:Url"];
-            var anonKey = Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY");
+            var anonKey = GetSupabaseAnonKey();
+            if (string.IsNullOrEmpty(anonKey))
+            {
+                _logger.LogError("Supabase anon key is not configured. Set SUPABASE_ANON_KEY or Supabase__AnonKey in environment variables.");
+                return StatusCode(500, new { error = "Supabase API key not configured" });
+            }
 
             var payload = new
             {
@@ -115,7 +129,12 @@ public class AuthController : ControllerBase
         try
         {
             var supabaseUrl = _configuration["Supabase:Url"];
-            var anonKey = Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY");
+            var anonKey = GetSupabaseAnonKey();
+            if (string.IsNullOrEmpty(anonKey))
+            {
+                _logger.LogError("Supabase anon key is not configured. Set SUPABASE_ANON_KEY or Supabase__AnonKey in environment variables.");
+                return StatusCode(500, new { error = "Supabase API key not configured" });
+            }
 
             var payload = new
             {
@@ -223,7 +242,12 @@ public class AuthController : ControllerBase
         try
         {
             var supabaseUrl = _configuration["Supabase:Url"];
-            var anonKey = Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY");
+            var anonKey = GetSupabaseAnonKey();
+            if (string.IsNullOrEmpty(anonKey))
+            {
+                _logger.LogError("Supabase anon key is not configured. Set SUPABASE_ANON_KEY or Supabase__AnonKey in environment variables.");
+                return StatusCode(500, new { error = "Supabase API key not configured" });
+            }
 
             var payload = new { refresh_token = request.RefreshToken };
             var json = JsonSerializer.Serialize(payload);
