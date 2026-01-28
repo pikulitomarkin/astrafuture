@@ -62,6 +62,7 @@ public class AuthController : ControllerBase
                 data = new
                 {
                     full_name = request.FullName,
+                    business_name = request.BusinessName,
                     tenant_id = request.TenantId
                 }
             };
@@ -106,7 +107,8 @@ public class AuthController : ControllerBase
                 {
                     Id = userId,
                     Email = request.Email,
-                    TenantId = Guid.TryParse(tenantId, out var tid) ? tid : null
+                    TenantId = Guid.TryParse(tenantId, out var tid) ? tid : null,
+                    BusinessName = request.BusinessName
                 }
             });
         }
@@ -166,12 +168,19 @@ public class AuthController : ControllerBase
             var userId = result.GetProperty("user").GetProperty("id").GetString()!;
             var email = result.GetProperty("user").GetProperty("email").GetString()!;
             
-            // Tentar pegar tenant_id dos metadados do usuário
+            // Tentar pegar tenant_id e business_name dos metadados do usuário
             var tenantId = Guid.NewGuid().ToString(); // Default
-            if (result.GetProperty("user").TryGetProperty("user_metadata", out var metadata) &&
-                metadata.TryGetProperty("tenant_id", out var tidElement))
+            string? businessName = null;
+            if (result.GetProperty("user").TryGetProperty("user_metadata", out var metadata))
             {
-                tenantId = tidElement.GetString() ?? tenantId;
+                if (metadata.TryGetProperty("tenant_id", out var tidElement))
+                {
+                    tenantId = tidElement.GetString() ?? tenantId;
+                }
+                if (metadata.TryGetProperty("business_name", out var bnElement))
+                {
+                    businessName = bnElement.GetString();
+                }
             }
             
             // Gerar nosso próprio JWT
@@ -188,7 +197,8 @@ public class AuthController : ControllerBase
                 {
                     Id = userId,
                     Email = email,
-                    TenantId = Guid.TryParse(tenantId, out var tidGuid) ? tidGuid : null
+                    TenantId = Guid.TryParse(tenantId, out var tidGuid) ? tidGuid : null,
+                    BusinessName = businessName
                 }
             });
         }
@@ -345,6 +355,7 @@ public record RegisterRequest
     public string Email { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
     public string? FullName { get; init; }
+    public string? BusinessName { get; init; }
     public Guid? TenantId { get; init; }
 }
 
@@ -372,4 +383,5 @@ public record UserInfo
     public string? Id { get; init; }
     public string? Email { get; init; }
     public Guid? TenantId { get; init; }
+    public string? BusinessName { get; init; }
 }
