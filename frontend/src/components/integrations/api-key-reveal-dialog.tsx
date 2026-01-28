@@ -69,7 +69,7 @@ export function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealD
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
               <li>Adicione o header <code className="bg-black/10 dark:bg-white/10 px-1 rounded">X-API-Key</code> em todas as requisições</li>
               <li>Use o valor da chave acima como valor do header</li>
-              <li>Veja a aba "Webhook URLs" para os endpoints disponíveis</li>
+              <li>Veja a aba &quot;Webhook URLs&quot; para os endpoints disponíveis</li>
             </ol>
           </div>
 
