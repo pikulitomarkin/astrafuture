@@ -9,6 +9,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Cores do WhatsApp/AstraAgenda
+        whatsapp: {
+          DEFAULT: '#25D366',
+          primary: '#25D366',
+          dark: '#075E54',
+          light: '#DCF8C6',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -16,7 +23,7 @@ module.exports = {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--foreground))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

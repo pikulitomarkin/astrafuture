@@ -6,8 +6,8 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AstraFuture - Sistema de Agendamentos',
-  description: 'Sistema de gerenciamento de agendamentos multi-tenant',
+  title: 'Astra Agenda - Sistema de Agendamentos',
+  description: 'Sistema profissional de gerenciamento de agendamentos para seu negócio',
 }
 
 export default function RootLayout({

@@ -42,15 +42,15 @@ export default function AppointmentsPage() {
       <div className="p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-[#075E54]">
               Todos os Agendamentos
             </h2>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[#333333] mt-1">
               {appointments?.length || 0} agendamento(s) encontrado(s)
             </p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button size="lg" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-5 w-5 mr-2" />
             Novo Agendamento
           </Button>
         </div>
@@ -69,9 +69,9 @@ export default function AppointmentsPage() {
 
         {!isLoading && !error && appointments && appointments.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-[#25D366] mb-4">
               <svg
-                className="mx-auto h-12 w-12"
+                className="mx-auto h-16 w-16"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -84,14 +84,14 @@ export default function AppointmentsPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-[#075E54] mb-2">
               Nenhum agendamento encontrado
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-[#333333] mb-6">
               Comece criando seu primeiro agendamento
             </p>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button size="lg" onClick={() => setDialogOpen(true)}>
+              <Plus className="h-5 w-5 mr-2" />
               Criar Primeiro Agendamento
             </Button>
           </div>

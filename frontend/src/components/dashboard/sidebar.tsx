@@ -35,14 +35,23 @@ export function Sidebar() {
   const { user, logout } = useAuth()
 
   return (
-    <div className="flex flex-col h-full w-64 bg-white border-r">
-      <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold text-primary">AstraFuture</h1>
-        {user && (
-          <p className="text-sm text-muted-foreground mt-1">{user.email}</p>
-        )}
+    <div className="flex flex-col h-full w-64 bg-white border-r border-gray-200 shadow-sm">
+      {/* Header com Logo */}
+      <div className="p-6 border-b border-gray-200 bg-[#075E54]">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center">
+            <Calendar className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-white">Astra Agenda</h1>
+            {user && (
+              <p className="text-xs text-white/80 mt-0.5">{user.email}</p>
+            )}
+          </div>
+        </div>
       </div>
       
+      {/* Menu de Navegação */}
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon
@@ -53,10 +62,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
+                'flex items-center space-x-3 px-4 py-3 rounded-lg transition-all font-medium',
                 isActive
-                  ? 'bg-primary text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-[#25D366] text-white shadow-md'
+                  : 'text-[#333333] hover:bg-gray-100'
               )}
             >
               <Icon className="h-5 w-5" />
@@ -66,10 +75,11 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t">
+      {/* Botão Sair */}
+      <div className="p-4 border-t border-gray-200">
         <Button
           variant="ghost"
-          className="w-full justify-start"
+          className="w-full justify-start text-[#333333] hover:bg-gray-100 hover:text-[#075E54]"
           onClick={logout}
         >
           <LogOut className="h-5 w-5 mr-3" />
