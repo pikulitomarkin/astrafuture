@@ -2,18 +2,26 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Debug: Ver o que foi copiado
-RUN pwd && ls -la && find . -name "*.csproj" -type f
+# Copiar arquivos de solução primeiro
+COPY ["AstraFuture.sln", "./"]
 
-# Copiar todo o projeto de uma vez
-COPY . .
+# Copiar todos os .csproj explicitamente
+COPY ["AstraFuture.Api/AstraFuture.Api.csproj", "AstraFuture.Api/"]
+COPY ["AstraFuture.Application/AstraFuture.Application.csproj", "AstraFuture.Application/"]
+COPY ["AstraFuture.Domain/AstraFuture.Domain.csproj", "AstraFuture.Domain/"]
+COPY ["AstraFuture.Infrastructure/AstraFuture.Infrastructure.csproj", "AstraFuture.Infrastructure/"]
+COPY ["AstraFuture.Shared/AstraFuture.Shared.csproj", "AstraFuture.Shared/"]
 
-# Debug: Ver o que foi copiado após COPY
-RUN pwd && ls -la && find . -name "*.csproj" -type f
+# Copiar código fonte de cada projeto
+COPY ["AstraFuture.Api/", "AstraFuture.Api/"]
+COPY ["AstraFuture.Application/", "AstraFuture.Application/"]
+COPY ["AstraFuture.Domain/", "AstraFuture.Domain/"]
+COPY ["AstraFuture.Infrastructure/", "AstraFuture.Infrastructure/"]
+COPY ["AstraFuture.Shared/", "AstraFuture.Shared/"]
 
-# Restaurar e publicar - usar path correto baseado no que foi copiado
-RUN dotnet restore "./AstraFuture.Api.csproj"
-RUN dotnet publish "./AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# Restaurar e publicar
+RUN dotnet restore "AstraFuture.Api/AstraFuture.Api.csproj"
+RUN dotnet publish "AstraFuture.Api/AstraFuture.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
