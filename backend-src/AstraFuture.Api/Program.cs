@@ -194,6 +194,29 @@ app.Use(async (context, next) =>
 
 app.UseCors();
 
+// Middleware para garantir CORS em respostas de erro e logar exceções
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetService<ILogger<Program>>()
+                     ?? throw new InvalidOperationException("Logger not available");
+        logger.LogError(ex, "Unhandled exception caught by global middleware");
+
+        // Garantir cabeçalhos CORS para que o navegador receba o erro corretamente
+        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsJsonAsync(new { error = "Internal Server Error" });
+    }
+});
+
 // Swagger UI (disponível em qualquer ambiente)
 app.UseSwagger();
 app.UseSwaggerUI(options =>
