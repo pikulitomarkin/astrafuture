@@ -59,6 +59,10 @@ else
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Host=db.alxtzjmtclopraayehfg.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=JGa8QltC28m9zBzP;SSL Mode=Require;Trust Server Certificate=true";
 
+// Garantir que a connection string fique disponível via IConfiguration para controllers e serviços
+// (evita erro quando GetConnectionString é chamado no código caso a env não tenha sido mapeada automaticamente)
+builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
+
 // Adiciona configurações ao IConfiguration para uso posterior
 builder.Configuration["Supabase:Url"] = supabaseUrl;
 if (useAuth)
