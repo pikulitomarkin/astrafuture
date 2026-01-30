@@ -88,33 +88,37 @@ def webhook():
         from_number = msg_data.get('from_number', '')
         
         if not incoming_msg or not from_number:
-    Suporta Twilio e Evolution API
-    """
-    try:
-        data = request.get_json()
-        to_number = data.get('to')
-        message = data.get('message')
-        media_url = data.get('media_url')
-        
-        if not to_number or not message:
-            return jsonify({'error': 'Missing to or message'}), 400
-        
-        # Enviar mensagem usando o provider configurado
-        async def send():
-            if media_url:
-                return await whatsapp_provider.send_media(to_number, media_url, message)
+            # Responder de forma adequada para cada provedor
+            if settings.whatsapp_provider == 'evolution':
+                return jsonify({'error': 'Missing message or from_number'}), 400
             else:
-                return await whatsapp_provider.send_message(to_number, message)
+                from twilio.twiml.messaging_response import MessagingResponse
+                resp = MessagingResponse()
+                resp.message("❌ Webhook inválido ou incompleto.")
+                return str(resp), 200
         
-        result = asyncio.run(send())
-        
-        logger.info(f"Mensagem enviada para {to_number} via {settings.whatsapp_provider}")
-        
-        return jsonify(result), 200 if result.get('success') else 5eturn str(resp), 200
-        
+        # Processar mensagem e montar resposta
+        try:
+            reply = message_handler.process_message(incoming_msg, from_number)
+            
+            if settings.whatsapp_provider == 'evolution':
+                return jsonify({'reply': reply}), 200
+            else:
+                from twilio.twiml.messaging_response import MessagingResponse
+                resp = MessagingResponse()
+                resp.message(reply)
+                return str(resp), 200
+        except Exception as e:
+            logger.error(f"Erro ao processar mensagem: {str(e)}", exc_info=True)
+            if settings.whatsapp_provider == 'evolution':
+                return jsonify({'error': 'Internal error'}), 500
+            else:
+                from twilio.twiml.messaging_response import MessagingResponse
+                resp = MessagingResponse()
+                resp.message("❌ Desculpe, ocorreu um erro. Tente novamente mais tarde.")
+                return str(resp), 200
     except Exception as e:
         logger.error(f"Erro ao processar webhook: {str(e)}", exc_info=True)
-        
         if settings.whatsapp_provider == 'evolution':
             return jsonify({'error': 'Internal error'}), 500
         else:
