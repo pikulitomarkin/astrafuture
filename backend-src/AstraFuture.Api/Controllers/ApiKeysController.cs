@@ -35,10 +35,16 @@ public class ApiKeysController : ControllerBase
                 return Unauthorized(new { message = "Tenant ID not found in token" });
             }
 
+            if (!Guid.TryParse(tenantId, out var tenantGuid))
+            {
+                _logger.LogWarning("Invalid tenant_id claim: {TenantId}", tenantId);
+                return BadRequest(new { message = "Invalid tenant_id in token" });
+            }
+
             await using var connection = new NpgsqlConnection(_connectionString);
             var apiKeys = await connection.QueryAsync<ApiKey>(
                 "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
-                new { TenantId = tenantId });
+                new { TenantId = tenantGuid });
 
             // Mascarar as keys na resposta (mostrar apenas últimos 8 caracteres)
             var maskedKeys = apiKeys.Select(k => new
@@ -91,7 +97,11 @@ public class ApiKeysController : ControllerBase
             };
 
             var apiKeyId = Guid.NewGuid();
-            var tenantGuid = Guid.Parse(tenantId);
+            if (!Guid.TryParse(tenantId, out var tenantGuid))
+            {
+                _logger.LogWarning("Invalid tenant_id claim on create: {TenantId}", tenantId);
+                return BadRequest(new { message = "Invalid tenant_id in token" });
+            }
 
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.ExecuteAsync(
@@ -141,12 +151,18 @@ public class ApiKeysController : ControllerBase
                 return Unauthorized(new { message = "Tenant ID not found in token" });
             }
 
+            if (!Guid.TryParse(tenantId, out var tenantGuid))
+            {
+                _logger.LogWarning("Invalid tenant_id claim on update: {TenantId}", tenantId);
+                return BadRequest(new { message = "Invalid tenant_id in token" });
+            }
+
             await using var connection = new NpgsqlConnection(_connectionString);
             
             // Verificar se a key pertence ao tenant
             var exists = await connection.ExecuteScalarAsync<bool>(
                 "SELECT EXISTS(SELECT 1 FROM api_keys WHERE id = @Id AND tenant_id = @TenantId)",
-                new { Id = id, TenantId = tenantId });
+                new { Id = id, TenantId = tenantGuid });
 
             if (!exists)
             {
@@ -189,11 +205,17 @@ public class ApiKeysController : ControllerBase
                 return Unauthorized(new { message = "Tenant ID not found in token" });
             }
 
+            if (!Guid.TryParse(tenantId, out var tenantGuid))
+            {
+                _logger.LogWarning("Invalid tenant_id claim on delete: {TenantId}", tenantId);
+                return BadRequest(new { message = "Invalid tenant_id in token" });
+            }
+
             await using var connection = new NpgsqlConnection(_connectionString);
             
             var deleted = await connection.ExecuteAsync(
                 "DELETE FROM api_keys WHERE id = @Id AND tenant_id = @TenantId",
-                new { Id = id, TenantId = tenantId });
+                new { Id = id, TenantId = tenantGuid });
 
             if (deleted == 0)
             {
