@@ -5,11 +5,11 @@ Processa mensagens e gerencia agendamentos via WhatsApp
 import logging
 import asyncio
 from flask import Flask, request, jsonify
-from config import settings
-from handlers.message_handler import MessageHandler
-from services.api_client import APIClient
-from services.twilio_provider import TwilioProvider
-from services.evolution_provider import EvolutionProvider
+from src.config import settings
+from src.handlers.message_handler import MessageHandler
+from src.services.api_client import APIClient
+from src.services.twilio_provider import TwilioProvider
+from src.services.evolution_provider import EvolutionProvider
 
 # Configurar logging
 logging.basicConfig(
