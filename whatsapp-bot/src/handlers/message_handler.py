@@ -5,7 +5,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from typing import Dict, Optional
-from services.api_client import APIClient
+from src.services.api_client import APIClient
 
 logger = logging.getLogger(__name__)
 
