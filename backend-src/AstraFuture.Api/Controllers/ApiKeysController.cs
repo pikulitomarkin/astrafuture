@@ -48,7 +48,7 @@ public class ApiKeysController : ControllerBase
                 var connBuilder = new NpgsqlConnectionStringBuilder(_connectionString);
                 
                 // Se não tiver options ou não tiver o tenant configurado, adiciona
-                if (!connBuilder.Options.Contains("app.tenant_id"))
+                if (connBuilder.Options == null || !connBuilder.Options.Contains("app.tenant_id"))
                 {
                     var options = connBuilder.Options ?? "";
                     if (!string.IsNullOrEmpty(options)) options += " ";
@@ -136,7 +136,7 @@ public class ApiKeysController : ControllerBase
                 // Estratégia Robusta: Injetar tenant_id diretamente na connection string
                 var connBuilder = new NpgsqlConnectionStringBuilder(_connectionString);
                 
-                if (!connBuilder.Options.Contains("app.tenant_id"))
+                if (connBuilder.Options == null || !connBuilder.Options.Contains("app.tenant_id"))
                 {
                     var options = connBuilder.Options ?? "";
                     if (!string.IsNullOrEmpty(options)) options += " ";
