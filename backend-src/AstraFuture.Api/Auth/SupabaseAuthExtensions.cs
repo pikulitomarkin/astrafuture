@@ -35,7 +35,10 @@ public static class SupabaseAuthExtensions
                 ValidateIssuer = false, // Supabase usa issuer dinâmico baseado na URL do projeto
                 ValidateAudience = false, // Supabase usa "authenticated" como audience
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(5)
+                ClockSkew = TimeSpan.FromMinutes(5),
+                RequireSignedTokens = true,
+                RequireExpirationTime = true,
+                TryAllIssuerSigningKeys = true // Tenta todas as chaves disponíveis
             };
 
             options.Events = new JwtBearerEvents

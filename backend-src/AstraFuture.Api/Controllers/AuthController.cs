@@ -216,6 +216,7 @@ public class AuthController : ControllerBase
             ?? throw new InvalidOperationException("JWT Secret not configured");
 
         var key = Encoding.ASCII.GetBytes(jwtSecret);
+        var securityKey = new SymmetricSecurityKey(key);
         var tokenHandler = new JwtSecurityTokenHandler();
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -232,7 +233,7 @@ public class AuthController : ControllerBase
             Issuer = "AstraFuture",
             Audience = "AstraFuture",
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
+                securityKey,
                 SecurityAlgorithms.HmacSha256Signature)
         };
 
