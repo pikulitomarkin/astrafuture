@@ -137,9 +137,20 @@ class EvolutionProvider(WhatsAppProvider):
         Returns:
             True se válido
         """
-        # Evolution API usa API key na header para validação
-        api_key = request_data.get('headers', {}).get('apikey', '')
-        return api_key == self.api_key
+        # Evolution API não envia API key nos webhooks
+        # Validamos apenas se há dados válidos no body
+        body = request_data.get('body', {})
+        
+        # Verificar se tem a estrutura básica do Evolution API
+        if not body:
+            return False
+        
+        # Verificar se tem o campo 'event' ou 'data'
+        has_event = 'event' in body
+        has_data = 'data' in body
+        
+        # Aceitar se tem estrutura válida do Evolution
+        return has_event or has_data
     
     def parse_incoming_message(self, request_data: Dict) -> Dict[str, str]:
         """
