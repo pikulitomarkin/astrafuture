@@ -164,6 +164,12 @@ class EvolutionProvider(WhatsAppProvider):
         """
         # Evolution API envia estrutura mais complexa
         data = request_data.get('data', {})
+        
+        # data pode ser lista (contacts.update, chats.update) ou dict (messages.upsert)
+        if isinstance(data, list):
+            # Se for lista, pegar primeiro item (ou retornar vazio se lista vazia)
+            data = data[0] if data else {}
+        
         key = data.get('key', {})
         message = data.get('message', {})
         

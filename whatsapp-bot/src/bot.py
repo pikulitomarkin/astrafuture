@@ -65,7 +65,8 @@ def webhook():
         if settings.whatsapp_provider == 'evolution':
             # Evolution API envia JSON
             data = request.get_json() or {}
-            logger.info(f"Evolution webhook recebido: {data.get('event', 'unknown')}")
+            event_type = data.get('event', 'unknown')
+            logger.info(f"Evolution webhook recebido: {event_type}")
             
             # Validar webhook
             webhook_data = {
@@ -75,6 +76,11 @@ def webhook():
             if not whatsapp_provider.validate_webhook(webhook_data):
                 logger.warning("Evolution webhook inválido")
                 return jsonify({'error': 'Unauthorized'}), 401
+            
+            # Filtrar apenas eventos de mensagens recebidas
+            if event_type != 'messages.upsert':
+                logger.debug(f"Ignorando evento {event_type}")
+                return jsonify({'status': 'ignored', 'event': event_type}), 200
             
             # Parsear mensagem
             msg_data = whatsapp_provider.parse_incoming_message(data)
