@@ -209,6 +209,11 @@ public class ApiKeysController : ControllerBase
                 return BadRequest(new { message = "Invalid tenant_id in token" });
             }
 
+            if (!Guid.TryParse(id, out var apiKeyGuid))
+            {
+                return BadRequest(new { message = "Invalid API Key ID format" });
+            }
+
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
@@ -224,7 +229,7 @@ public class ApiKeysController : ControllerBase
             {
                 _logger.LogWarning("Attempt to update API key for non-existing tenant: {TenantId}", tenantGuid);
                 return NotFound(new { message = "Tenant not found" });
-            }
+            }apiKeyGu
             
             // Verificar se a key pertence ao tenant
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -244,7 +249,7 @@ public class ApiKeysController : ControllerBase
                       updated_at = @Now 
                   WHERE id = @Id",
                 new { 
-                    Id = id, 
+                    Id = apiKeyGuid, 
                     request.Name, 
                     request.Description, 
                     request.IsActive, 
@@ -278,6 +283,11 @@ public class ApiKeysController : ControllerBase
                 return BadRequest(new { message = "Invalid tenant_id in token" });
             }
 
+            if (!Guid.TryParse(id, out var apiKeyGuid))
+            {
+                return BadRequest(new { message = "Invalid API Key ID format" });
+            }
+
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
@@ -297,7 +307,7 @@ public class ApiKeysController : ControllerBase
             
             var deleted = await connection.ExecuteAsync(
                 "DELETE FROM api_keys WHERE id = @Id AND tenant_id = @TenantId",
-                new { Id = id, TenantId = tenantGuid });
+                new { Id = apiKeyGuid, TenantId = tenantGuid });
 
             if (deleted == 0)
             {
