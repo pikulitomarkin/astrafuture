@@ -22,37 +22,42 @@ class MessageHandler:
         """
         Processa mensagem e retorna resposta
         """
-        message = message.lower().strip()
+        logger.info(f"Processing message from {from_number}: '{message}'")
+        logger.info(f"Current sessions: {list(self.user_sessions.keys())}")
+        
+        message_lower = message.lower().strip()
         
         # Comandos básicos
-        if message in ['oi', 'olá', 'ola', 'hey', 'inicio', 'start', 'menu']:
+        if message_lower in ['oi', 'olá', 'ola', 'hey', 'inicio', 'start', 'menu']:
             return self._menu_principal()
         
-        if message in ['ajuda', 'help', '?']:
+        if message_lower in ['ajuda', 'help', '?']:
             return self._help_message()
         
-        if message == '1' or 'agendar' in message:
+        if message_lower == '1' or 'agendar' in message_lower:
             return self._iniciar_agendamento(from_number)
         
-        if message == '2' or 'meus agendamentos' in message:
+        if message_lower == '2' or 'meus agendamentos' in message_lower:
             return self._listar_agendamentos(from_number)
         
-        if message == '3' or 'cancelar' in message:
+        if message_lower == '3' or 'cancelar' in message_lower:
             return self._iniciar_cancelamento(from_number)
         
         # Processar fluxo de agendamento
         session = self.user_sessions.get(from_number, {})
+        logger.info(f"Session for {from_number}: {session}")
+        
         if session.get('status') == 'aguardando_nome':
-            return self._processar_nome(from_number, message)
+            return self._processar_nome(from_number, message)  # Mantém capitalização original
         
         if session.get('status') == 'aguardando_data':
-            return self._processar_data(from_number, message)
+            return self._processar_data(from_number, message_lower)
         
         if session.get('status') == 'aguardando_horario':
-            return self._processar_horario(from_number, message)
+            return self._processar_horario(from_number, message_lower)
         
         if session.get('status') == 'aguardando_servico':
-            return self._processar_servico(from_number, message)
+            return self._processar_servico(from_number, message_lower)
         
         # Mensagem não reconhecida
         return ("❓ Desculpe, não entendi sua mensagem.\n\n"
