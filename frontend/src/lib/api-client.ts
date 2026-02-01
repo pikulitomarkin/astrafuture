@@ -41,6 +41,14 @@ class ApiClient {
       const token = this.getToken()
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+        console.log('[API] Request com token:', { 
+          url: config.url, 
+          method: config.method,
+          hasToken: !!token,
+          tokenPreview: token.substring(0, 20) + '...'
+        })
+      } else {
+        console.warn('[API] Request SEM token:', { url: config.url, method: config.method })
       }
       return config
     })
@@ -50,6 +58,11 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
+          console.error('[API] 401 Unauthorized - limpando token e redirecionando para login', {
+            url: error.config?.url,
+            method: error.config?.method,
+            headers: error.config?.headers
+          })
           this.clearToken()
           if (typeof window !== 'undefined') {
             window.location.href = '/login'
