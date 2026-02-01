@@ -47,13 +47,10 @@ public class ApiKeysController : ControllerBase
                 await using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                // Definir o tenant context APÓS conectar (SET ao invés de SET LOCAL)
-                await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
+                // Não precisamos SET app.tenant_id pois temos BYPASSRLS
+                // Filtramos diretamente por tenant_id
 
                 _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
-
-                // Como temos BYPASSRLS, precisamos garantir que o tenant existe manualmente se quisermos
-                // Mas o RLS para este usuário (se reativado) ou filtros manuais devem cuidar disso
                 
                 var apiKeys = await connection.QueryAsync<ApiKey>(
                     "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
@@ -131,8 +128,8 @@ public class ApiKeysController : ControllerBase
                 await using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                // Definir tenant context manualmente (SET ao invés de SET LOCAL pois não há transação)
-                await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
+                // Não precisamos SET app.tenant_id pois temos BYPASSRLS
+                // Filtramos diretamente por tenant_id nas queries
 
                 // Verificar existência de tenant
                 var tenantExists = await connection.ExecuteScalarAsync<bool>(
@@ -161,6 +158,8 @@ public class ApiKeysController : ControllerBase
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     });
+
+                _logger.LogInformation("API key created successfully for tenant {TenantId}: {ApiKeyId}", tenantGuid, apiKeyId);
             }
             catch (Npgsql.PostgresException pgEx)
             {
@@ -217,8 +216,8 @@ public class ApiKeysController : ControllerBase
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Definir tenant context (SET ao invés de SET LOCAL)
-            await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
+            // Não precisamos SET app.tenant_id pois temos BYPASSRLS
+            // Filtramos diretamente por tenant_id
 
             // Verificar existência de tenant antes de qualquer operação
             var tenantExists = await connection.ExecuteScalarAsync<bool>(
@@ -291,8 +290,8 @@ public class ApiKeysController : ControllerBase
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Definir tenant context (SET ao invés de SET LOCAL)
-            await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
+            // Não precisamos SET app.tenant_id pois temos BYPASSRLS
+            // Filtramos diretamente por tenant_id
 
             // Verificar existência de tenant
             var tenantExists = await connection.ExecuteScalarAsync<bool>(

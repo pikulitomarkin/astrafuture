@@ -46,12 +46,14 @@ public class SupabaseContext : IDisposable
     /// </summary>
     public async Task SetTenantContextAsync(Guid tenantId)
     {
-        var command = (NpgsqlCommand)Connection.CreateCommand();
-        // SET ao invés de SET LOCAL pois funciona sem transação
-        // Com connection pooling, cada request pega uma conexão limpa
-        command.CommandText = $"SET app.tenant_id = '{tenantId}'";
-
-        await command.ExecuteNonQueryAsync();
+        // BYPASSRLS está ativo - não precisamos SET app.tenant_id
+        // Filtramos diretamente por tenant_id nas queries
+        // Se RLS for reativado no futuro, descomentar:
+        // var command = (NpgsqlCommand)Connection.CreateCommand();
+        // command.CommandText = $"SET app.tenant_id = '{tenantId}'";
+        // await command.ExecuteNonQueryAsync();
+        
+        await Task.CompletedTask;
     }
 
     /// <summary>
