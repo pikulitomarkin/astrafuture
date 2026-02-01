@@ -47,8 +47,9 @@ public class SupabaseContext : IDisposable
     public async Task SetTenantContextAsync(Guid tenantId)
     {
         var command = (NpgsqlCommand)Connection.CreateCommand();
-        // SET LOCAL não aceita parâmetros, mas GUID é seguro pois já vem validado
-        command.CommandText = $"SET LOCAL app.tenant_id = '{tenantId}'";
+        // SET ao invés de SET LOCAL pois funciona sem transação
+        // Com connection pooling, cada request pega uma conexão limpa
+        command.CommandText = $"SET app.tenant_id = '{tenantId}'";
 
         await command.ExecuteNonQueryAsync();
     }

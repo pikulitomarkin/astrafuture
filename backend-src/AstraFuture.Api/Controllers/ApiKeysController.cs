@@ -47,8 +47,8 @@ public class ApiKeysController : ControllerBase
                 await using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                // Definir o tenant context APÓS conectar (mais seguro e compatível com poolers)
-                await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
+                // Definir o tenant context APÓS conectar (SET ao invés de SET LOCAL)
+                await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
 
                 _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
 
@@ -131,8 +131,8 @@ public class ApiKeysController : ControllerBase
                 await using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                // Definir tenant context manualmente
-                await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
+                // Definir tenant context manualmente (SET ao invés de SET LOCAL pois não há transação)
+                await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
 
                 // Verificar existência de tenant
                 var tenantExists = await connection.ExecuteScalarAsync<bool>(
@@ -217,8 +217,8 @@ public class ApiKeysController : ControllerBase
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Definir tenant context
-            await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
+            // Definir tenant context (SET ao invés de SET LOCAL)
+            await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
 
             // Verificar existência de tenant antes de qualquer operação
             var tenantExists = await connection.ExecuteScalarAsync<bool>(
@@ -291,8 +291,8 @@ public class ApiKeysController : ControllerBase
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Definir tenant context
-            await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
+            // Definir tenant context (SET ao invés de SET LOCAL)
+            await connection.ExecuteAsync($"SET app.tenant_id = '{tenantGuid}'");
 
             // Verificar existência de tenant
             var tenantExists = await connection.ExecuteScalarAsync<bool>(
