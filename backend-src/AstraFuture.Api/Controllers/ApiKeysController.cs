@@ -41,23 +41,53 @@ public class ApiKeysController : ControllerBase
                 return BadRequest(new { message = "Invalid tenant_id in token" });
             }
 
-            await using var connection = new NpgsqlConnection(_connectionString);
-            _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
-
-            // Verificar se o tenant existe para evitar erros de FK/RLS
-            var tenantExists = await connection.ExecuteScalarAsync<bool>(
-                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
-                new { TenantId = tenantGuid });
-
-            if (!tenantExists)
+            try
             {
-                _logger.LogWarning("Tenant not found: {TenantId}", tenantGuid);
-                return NotFound(new { message = "Tenant not found" });
-            }
+                await using var connection = new NpgsqlConnection(_connectionString);
+                _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
 
-            var apiKeys = await connection.QueryAsync<ApiKey>(
-                "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
-                new { TenantId = tenantGuid });
+                // Verificar se o tenant existe para evitar erros de FK/RLS
+                var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                    "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                    new { TenantId = tenantGuid });
+
+                if (!tenantExists)
+                {
+                    _logger.LogWarning("Tenant not found: {TenantId}", tenantGuid);
+                    return NotFound(new { message = "Tenant not found" });
+                }
+
+                var apiKeys = await connection.QueryAsync<ApiKey>(
+                    "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
+                    new { TenantId = tenantGuid });
+
+                // Mascarar as keys na resposta (mostrar apenas últimos 8 caracteres)
+                var maskedKeys = apiKeys.Select(k => new
+                {
+                    k.Id,
+                    Key = MaskApiKey(k.Key),
+                    k.Name,
+                    k.Description,
+                    k.IsActive,
+                    k.LastUsedAt,
+                    k.ExpiresAt,
+                    k.UsageCount,
+                    k.RateLimit,
+                    k.CreatedAt
+                });
+
+                return Ok(maskedKeys);
+            }
+            catch (Npgsql.PostgresException pgEx)
+            {
+                _logger.LogError(pgEx, "Postgres error while fetching API keys for tenant {TenantId}", tenantGuid);
+                return StatusCode(502, new { message = "Database error. Check connection/credentials and that migrations were applied." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error fetching API keys for tenant {TenantId}", tenantGuid);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
 
             // Mascarar as keys na resposta (mostrar apenas últimos 8 caracteres)
             var maskedKeys = apiKeys.Select(k => new
@@ -116,35 +146,48 @@ public class ApiKeysController : ControllerBase
                 return BadRequest(new { message = "Invalid tenant_id in token" });
             }
 
-            await using var connection = new NpgsqlConnection(_connectionString);
-
-            // Verificar existência de tenant antes de tentar inserir
-            var tenantExists = await connection.ExecuteScalarAsync<bool>(
-                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
-                new { TenantId = tenantGuid });
-
-            if (!tenantExists)
+            try
             {
-                _logger.LogWarning("Attempt to create API key for non-existing tenant: {TenantId}", tenantGuid);
-                return NotFound(new { message = "Tenant not found" });
-            }
+                await using var connection = new NpgsqlConnection(_connectionString);
 
-            await connection.ExecuteAsync(
-                @"INSERT INTO api_keys (id, key, name, description, tenant_id, is_active, expires_at, rate_limit, usage_count, created_at, updated_at)
-                  VALUES (@Id, @Key, @Name, @Description, @TenantId, @IsActive, @ExpiresAt, @RateLimit, @UsageCount, @CreatedAt, @UpdatedAt)",
-                new {
-                    Id = apiKeyId,
-                    apiKey.Key,
-                    apiKey.Name,
-                    apiKey.Description,
-                    TenantId = tenantGuid,
-                    apiKey.IsActive,
-                    apiKey.ExpiresAt,
-                    apiKey.RateLimit,
-                    apiKey.UsageCount,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                });
+                // Verificar existência de tenant antes de tentar inserir
+                var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                    "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                    new { TenantId = tenantGuid });
+
+                if (!tenantExists)
+                {
+                    _logger.LogWarning("Attempt to create API key for non-existing tenant: {TenantId}", tenantGuid);
+                    return NotFound(new { message = "Tenant not found" });
+                }
+
+                await connection.ExecuteAsync(
+                    @"INSERT INTO api_keys (id, key, name, description, tenant_id, is_active, expires_at, rate_limit, usage_count, created_at, updated_at)
+                      VALUES (@Id, @Key, @Name, @Description, @TenantId, @IsActive, @ExpiresAt, @RateLimit, @UsageCount, @CreatedAt, @UpdatedAt)",
+                    new {
+                        Id = apiKeyId,
+                        apiKey.Key,
+                        apiKey.Name,
+                        apiKey.Description,
+                        TenantId = tenantGuid,
+                        apiKey.IsActive,
+                        apiKey.ExpiresAt,
+                        apiKey.RateLimit,
+                        apiKey.UsageCount,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+            }
+            catch (Npgsql.PostgresException pgEx)
+            {
+                _logger.LogError(pgEx, "Postgres error while creating API key for tenant {TenantId}", tenantGuid);
+                return StatusCode(502, new { message = "Database error. Check connection/credentials and that migrations were applied." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error creating API key for tenant {TenantId}", tenantGuid);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
 
             // Retornar a key completa apenas na criação (única vez)
             return Ok(new
