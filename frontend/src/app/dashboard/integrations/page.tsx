@@ -310,7 +310,3 @@ export default function IntegrationsPage() {
     </div>
   )
 }
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <label className="text-sm font-medium">{children}</label>
-}
