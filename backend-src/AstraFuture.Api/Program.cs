@@ -118,8 +118,9 @@ if (useAuth)
 }
 else
 {
-    // Sem autenticação real em desenvolvimento
-    builder.Services.AddAuthentication();
+    // Sem autenticação real em desenvolvimento - mas precisa definir esquema padrão
+    builder.Services.AddAuthentication("Bearer")
+        .AddJwtBearer("Bearer", options => { options.RequireHttpsMetadata = false; });
     builder.Services.AddAuthorization();
     Console.WriteLine("[AUTH] JWT Authentication DISABLED (SUPABASE_JWT_SECRET not set)");
 }
