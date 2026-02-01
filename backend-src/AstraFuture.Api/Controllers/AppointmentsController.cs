@@ -34,7 +34,6 @@ public class AppointmentsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<AppointmentDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(
-        [FromHeader(Name = "X-Tenant-Id")] Guid tenantId,
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null,
         [FromQuery] Guid? customerId = null,
@@ -43,6 +42,14 @@ public class AppointmentsController : ControllerBase
     {
         try
         {
+            // Extrair tenant_id do JWT
+            var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+            if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+            {
+                _logger.LogWarning("Invalid or missing tenant_id in JWT");
+                return BadRequest(new { error = "Invalid tenant_id in token" });
+            }
+
             _logger.LogInformation("Getting appointments for tenant {TenantId}", tenantId);
             
             var query = new GetAppointmentsQuery
@@ -71,12 +78,18 @@ public class AppointmentsController : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(AppointmentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(
-        Guid id,
-        [FromHeader(Name = "X-Tenant-Id")] Guid tenantId)
+    public async Task<IActionResult> GetById(Guid id)
     {
         try
         {
+            // Extrair tenant_id do JWT
+            var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+            if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+            {
+                _logger.LogWarning("Invalid or missing tenant_id in JWT");
+                return BadRequest(new { error = "Invalid tenant_id in token" });
+            }
+
             _logger.LogInformation("Getting appointment {Id} for tenant {TenantId}", id, tenantId);
 
             var query = new GetAppointmentByIdQuery
@@ -178,11 +191,18 @@ public class AppointmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update(
         Guid id,
-        [FromHeader(Name = "X-Tenant-Id")] Guid tenantId,
         [FromBody] UpdateAppointmentRequest request)
     {
         try
         {
+            // Extrair tenant_id do JWT
+            var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+            if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+            {
+                _logger.LogWarning("Invalid or missing tenant_id in JWT");
+                return BadRequest(new { error = "Invalid tenant_id in token" });
+            }
+
             _logger.LogInformation("Updating appointment {Id} for tenant {TenantId}", id, tenantId);
 
             var command = new UpdateAppointmentCommand
@@ -220,12 +240,18 @@ public class AppointmentsController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(
-        Guid id,
-        [FromHeader(Name = "X-Tenant-Id")] Guid tenantId)
+    public async Task<IActionResult> Delete(Guid id)
     {
         try
         {
+            // Extrair tenant_id do JWT
+            var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+            if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+            {
+                _logger.LogWarning("Invalid or missing tenant_id in JWT");
+                return BadRequest(new { error = "Invalid tenant_id in token" });
+            }
+
             _logger.LogInformation("Deleting appointment {Id} for tenant {TenantId}", id, tenantId);
 
             var command = new DeleteAppointmentCommand
