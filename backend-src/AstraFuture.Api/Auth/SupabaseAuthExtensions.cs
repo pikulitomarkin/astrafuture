@@ -50,10 +50,23 @@ public static class SupabaseAuthExtensions
                     logger.LogInformation("[JWT] Token received: {HasToken}, Path: {Path}", !string.IsNullOrEmpty(token), context.Request.Path);
                     if (!string.IsNullOrEmpty(token))
                     {
+                        try
+                        {
+                            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                            var jwt = handler.ReadJwtToken(token);
+                            var alg = jwt.Header.Alg;
+                            var kid = jwt.Header.TryGetValue("kid", out var kidVal) ? kidVal?.ToString() : null;
+                            logger.LogInformation("[JWT] Token header: alg={Alg}, kid={Kid}", alg, kid ?? "(none)");
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogWarning("[JWT] Failed to parse token header: {Error}", ex.Message);
+                        }
                         logger.LogInformation("[JWT] Token preview: {TokenPreview}", token.Substring(0, Math.Min(50, token.Length)));
                     }
                     return Task.CompletedTask;
                 },
+
                 OnAuthenticationFailed = context =>
                 {
                     var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();

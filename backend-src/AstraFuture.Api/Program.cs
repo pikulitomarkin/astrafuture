@@ -106,6 +106,20 @@ builder.Services.AddCors(options =>
 // JWT Authentication (Supabase) - só ativa se JWT secret estiver configurado
 if (useAuth)
 {
+    // Log SHA256 hash of the secret (first 8 chars) to help debug signing issues without leaking the secret
+    try
+    {
+        var jwtSecretRaw = builder.Configuration["Supabase:JwtSecret"] ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET");
+        if (!string.IsNullOrEmpty(jwtSecretRaw))
+        {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(jwtSecretRaw));
+            var hex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            Console.WriteLine("[AUTH] JWT secret SHA256 prefix: {0}", hex.Substring(0, 8));
+        }
+    }
+    catch { /* non-critical */ }
+
     builder.Services.AddSupabaseJwtAuthentication(builder.Configuration);
     Console.WriteLine("[AUTH] JWT Authentication ENABLED");
 }

@@ -238,7 +238,23 @@ public class AuthController : ControllerBase
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var tokenString = tokenHandler.WriteToken(token);
+
+        // Log a short hash of the secret at token creation time for correlation with validation logs
+        try
+        {
+            var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET") ?? _configuration["Supabase:JwtSecret"] ?? string.Empty;
+            if (!string.IsNullOrEmpty(jwtSecret))
+            {
+                using var sha = System.Security.Cryptography.SHA256.Create();
+                var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(jwtSecret));
+                var hex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                _logger.LogInformation("[AUTH] JWT secret SHA256 prefix when signing: {Hash}", hex.Substring(0, 8));
+            }
+        }
+        catch { /* ignore */ }
+
+        return tokenString;
     }
 
     /// <summary>
