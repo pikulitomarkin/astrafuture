@@ -32,10 +32,8 @@ public static class SupabaseAuthExtensions
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = "AstraFuture",
-                ValidateAudience = true,
-                ValidAudience = "AstraFuture",
+                ValidateIssuer = false, // Supabase usa issuer dinâmico baseado na URL do projeto
+                ValidateAudience = false, // Supabase usa "authenticated" como audience
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(5)
             };
