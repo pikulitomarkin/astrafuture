@@ -33,6 +33,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        // Após hidratar, verificar se há token válido e atualizar isAuthenticated
+        if (state?.token && state?.user) {
+          state.isAuthenticated = true
+        }
+      },
     }
   )
 )
