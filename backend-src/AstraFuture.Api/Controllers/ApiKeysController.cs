@@ -43,6 +43,18 @@ public class ApiKeysController : ControllerBase
 
             await using var connection = new NpgsqlConnection(_connectionString);
             _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
+
+            // Verificar se o tenant existe para evitar erros de FK/RLS
+            var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                new { TenantId = tenantGuid });
+
+            if (!tenantExists)
+            {
+                _logger.LogWarning("Tenant not found: {TenantId}", tenantGuid);
+                return NotFound(new { message = "Tenant not found" });
+            }
+
             var apiKeys = await connection.QueryAsync<ApiKey>(
                 "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
                 new { TenantId = tenantGuid });
@@ -105,6 +117,18 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+
+            // Verificar existência de tenant antes de tentar inserir
+            var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                new { TenantId = tenantGuid });
+
+            if (!tenantExists)
+            {
+                _logger.LogWarning("Attempt to create API key for non-existing tenant: {TenantId}", tenantGuid);
+                return NotFound(new { message = "Tenant not found" });
+            }
+
             await connection.ExecuteAsync(
                 @"INSERT INTO api_keys (id, key, name, description, tenant_id, is_active, expires_at, rate_limit, usage_count, created_at, updated_at)
                   VALUES (@Id, @Key, @Name, @Description, @TenantId, @IsActive, @ExpiresAt, @RateLimit, @UsageCount, @CreatedAt, @UpdatedAt)",
@@ -159,6 +183,17 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+
+            // Verificar existência de tenant antes de qualquer operação
+            var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                new { TenantId = tenantGuid });
+
+            if (!tenantExists)
+            {
+                _logger.LogWarning("Attempt to update API key for non-existing tenant: {TenantId}", tenantGuid);
+                return NotFound(new { message = "Tenant not found" });
+            }
             
             // Verificar se a key pertence ao tenant
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -213,6 +248,17 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+
+            // Verificar existência de tenant
+            var tenantExists = await connection.ExecuteScalarAsync<bool>(
+                "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
+                new { TenantId = tenantGuid });
+
+            if (!tenantExists)
+            {
+                _logger.LogWarning("Attempt to delete API key for non-existing tenant: {TenantId}", tenantGuid);
+                return NotFound(new { message = "Tenant not found" });
+            }
             
             var deleted = await connection.ExecuteAsync(
                 "DELETE FROM api_keys WHERE id = @Id AND tenant_id = @TenantId",
