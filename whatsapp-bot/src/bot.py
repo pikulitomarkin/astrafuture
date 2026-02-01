@@ -108,8 +108,18 @@ def webhook():
             reply = message_handler.process_message(incoming_msg, from_number)
             
             if settings.whatsapp_provider == 'evolution':
-                return jsonify({'reply': reply}), 200
+                # Evolution API: enviar mensagem ativamente (não retorna no webhook)
+                import asyncio
+                result = asyncio.run(whatsapp_provider.send_message(from_number, reply))
+                
+                if result.get('success'):
+                    logger.info(f"Mensagem enviada com sucesso para {from_number}")
+                    return jsonify({'status': 'sent', 'message_id': result.get('message_id')}), 200
+                else:
+                    logger.error(f"Erro ao enviar mensagem: {result.get('error')}")
+                    return jsonify({'error': result.get('error')}), 500
             else:
+                # Twilio: retornar TwiML no response
                 from twilio.twiml.messaging_response import MessagingResponse
                 resp = MessagingResponse()
                 resp.message(reply)
