@@ -40,10 +40,22 @@ public static class SupabaseAuthExtensions
 
             options.Events = new JwtBearerEvents
             {
+                OnMessageReceived = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    var token = context.Token;
+                    logger.LogInformation("[JWT] Token received: {HasToken}, Path: {Path}", !string.IsNullOrEmpty(token), context.Request.Path);
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        logger.LogInformation("[JWT] Token preview: {TokenPreview}", token.Substring(0, Math.Min(50, token.Length)));
+                    }
+                    return Task.CompletedTask;
+                },
                 OnAuthenticationFailed = context =>
                 {
                     var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
-                    logger.LogWarning("JWT Authentication failed: {Error}", context.Exception.Message);
+                    logger.LogError("[JWT] Authentication FAILED for {Path}: {Error}", context.Request.Path, context.Exception.Message);
+                    logger.LogError("[JWT] Exception details: {Exception}", context.Exception.ToString());
                     return Task.CompletedTask;
                 },
                 OnTokenValidated = context =>
@@ -51,7 +63,15 @@ public static class SupabaseAuthExtensions
                     var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
                     var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier) 
                               ?? context.Principal?.FindFirstValue("sub");
-                    logger.LogInformation("JWT validated for user: {UserId}", userId);
+                    var tenantId = context.Principal?.FindFirstValue("tenant_id");
+                    logger.LogInformation("[JWT] Token VALIDATED successfully for user: {UserId}, tenant: {TenantId}", userId, tenantId);
+                    return Task.CompletedTask;
+                },
+                OnChallenge = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogWarning("[JWT] Challenge triggered for {Path}: {Error}, {ErrorDescription}", 
+                        context.Request.Path, context.Error, context.ErrorDescription);
                     return Task.CompletedTask;
                 }
             };
