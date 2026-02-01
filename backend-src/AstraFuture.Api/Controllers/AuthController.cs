@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 namespace AstraFuture.Api.Controllers;
 
@@ -144,9 +145,10 @@ public class AuthController : ControllerBase
 
                     // Criar usuário na tabela app.users vinculado ao tenant (owner)
                     var appUserId = Guid.NewGuid();
+                    var authUserGuid = Guid.TryParse(userId, out var parsedAuthUser) ? parsedAuthUser : Guid.NewGuid();
                     await conn.ExecuteAsync(@"INSERT INTO users (id, tenant_id, auth_user_id, email, full_name, role, is_active, email_verified_at, created_at, updated_at)
                                               VALUES (@Id, @TenantId, @AuthUserId, @Email, @FullName, @Role, true, NOW(), NOW(), NOW())",
-                        new { Id = appUserId, TenantId = tenantGuid, AuthUserId = Guid.Parse(userId), Email = request.Email, FullName = request.FullName ?? request.Email, Role = "owner" });
+                        new { Id = appUserId, TenantId = tenantGuid, AuthUserId = authUserGuid, Email = request.Email, FullName = request.FullName ?? request.Email, Role = "owner" });
                 }
 
                 tenantId = tenantGuid.ToString();
