@@ -108,6 +108,14 @@ export default function IntegrationsPage() {
               ) : (
                 <div className="space-y-3">
                   {apiKeys.map((apiKey) => {
+                    // Debug: verificar data recebida
+                    console.log('API Key:', apiKey.name, {
+                      expiresAt: apiKey.expiresAt,
+                      expiresAtDate: new Date(apiKey.expiresAt),
+                      now: new Date(),
+                      isExpired: new Date(apiKey.expiresAt) < new Date()
+                    })
+                    
                     const isExpired = new Date(apiKey.expiresAt) < new Date()
                     
                     return (
