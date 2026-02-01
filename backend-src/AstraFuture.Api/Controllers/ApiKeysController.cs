@@ -210,6 +210,10 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            // Definir tenant context
+            await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
 
             // Verificar existência de tenant antes de qualquer operação
             var tenantExists = await connection.ExecuteScalarAsync<bool>(
@@ -275,6 +279,10 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            // Definir tenant context
+            await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
 
             // Verificar existência de tenant
             var tenantExists = await connection.ExecuteScalarAsync<bool>(
