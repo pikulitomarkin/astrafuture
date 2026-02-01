@@ -17,6 +17,9 @@ RUN dotnet publish "AstraFuture.Api/AstraFuture.Api.csproj" -c Release -o /app/p
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Install dependencies (ICU for localized content, krb5 for Npgsql/GSSAPI)
+RUN apk add --no-cache icu-libs krb5-libs
+
 # Copiar arquivos publicados
 COPY --from=build /app/publish .
 
