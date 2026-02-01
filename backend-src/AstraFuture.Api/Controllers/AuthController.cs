@@ -169,18 +169,24 @@ public class AuthController : ControllerBase
             var email = result.GetProperty("user").GetProperty("email").GetString()!;
             
             // Tentar pegar tenant_id e business_name dos metadados do usuário
-            var tenantId = Guid.NewGuid().ToString(); // Default
+            string? tenantId = null;
             string? businessName = null;
             if (result.GetProperty("user").TryGetProperty("user_metadata", out var metadata))
             {
                 if (metadata.TryGetProperty("tenant_id", out var tidElement))
                 {
-                    tenantId = tidElement.GetString() ?? tenantId;
+                    tenantId = tidElement.GetString();
                 }
                 if (metadata.TryGetProperty("business_name", out var bnElement))
                 {
                     businessName = bnElement.GetString();
                 }
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                _logger.LogWarning("Login attempt for user {Email} without tenant_id in user_metadata", request.Email);
+                return BadRequest(new { error = "Usuário não está associado a um tenant. Contate o administrador." });
             }
             
             // Gerar nosso próprio JWT

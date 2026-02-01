@@ -42,6 +42,7 @@ public class ApiKeysController : ControllerBase
             }
 
             await using var connection = new NpgsqlConnection(_connectionString);
+            _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
             var apiKeys = await connection.QueryAsync<ApiKey>(
                 "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
                 new { TenantId = tenantGuid });
@@ -250,15 +251,11 @@ public class ApiKeysController : ControllerBase
     // Métodos auxiliares
     private static string GenerateApiKey()
     {
-        // Gerar uma key segura: astrafuture_live_[40 caracteres aleatórios]
-        var bytes = new byte[30];
+        // Gerar uma key segura: astrafuture_live_[40 hex chars]
+        var bytes = new byte[20]; // 20 bytes => 40 hex characters
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        var randomPart = Convert.ToBase64String(bytes)
-            .Replace("+", "")
-            .Replace("/", "")
-            .Replace("=", "")
-            .Substring(0, 40);
+        var randomPart = BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
         
         return $"astrafuture_live_{randomPart}";
     }
