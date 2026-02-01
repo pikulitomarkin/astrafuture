@@ -35,8 +35,9 @@ var supabaseUrl = builder.Configuration["Supabase:Url"]
     ?? Environment.GetEnvironmentVariable("SUPABASE_URL")
     ?? throw new InvalidOperationException("SUPABASE_URL não configurada");
 
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET");
+// Prefer the explicit environment variable `SUPABASE_JWT_SECRET` to avoid mismatch between config sources
+var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET")
+    ?? builder.Configuration["Jwt:Secret"];
 
 var useAuth = !string.IsNullOrEmpty(jwtSecret);
 if (useAuth)

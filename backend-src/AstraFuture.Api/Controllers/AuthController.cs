@@ -211,8 +211,9 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(string userId, string email, string tenantId)
     {
-        var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET")
-            ?? _configuration["Supabase:JwtSecret"]
+        // Use the Supabase:JwtSecret value from IConfiguration (set at startup) to ensure consistency
+        var jwtSecret = _configuration["Supabase:JwtSecret"]
+            ?? Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET")
             ?? throw new InvalidOperationException("JWT Secret not configured");
 
         var key = Encoding.ASCII.GetBytes(jwtSecret);
