@@ -186,7 +186,7 @@ public class AuthController : ControllerBase
             {
                 if (autoCreate)
                 {
-                    tenantId = await CreateTenantAndAssociateUser(userId, request.Email, request.BusinessName, request.FullName);
+                    tenantId = await CreateTenantAndAssociateUser(userId!, request.Email, request.BusinessName, request.FullName);
                 }
                 else
                 {
@@ -295,7 +295,7 @@ public class AuthController : ControllerBase
                 if (autoCreate)
                 {
                     _logger.LogInformation("Auto-creating tenant for existing user {Email} on login", request.Email);
-                    tenantId = await CreateTenantAndAssociateUser(userId, email, businessName, null);
+                    tenantId = await CreateTenantAndAssociateUser(userId!, email, businessName, null);
                 }
                 else
                 {

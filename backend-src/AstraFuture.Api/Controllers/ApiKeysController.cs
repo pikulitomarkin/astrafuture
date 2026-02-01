@@ -61,8 +61,8 @@ public class ApiKeysController : ControllerBase
                     "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
                     new { TenantId = tenantGuid });
 
-                // Mascarar as keys na resposta (mostrar apenas últimos 8 caracteres)
-                var maskedKeys = apiKeys.Select(k => new
+                // Retornar com keys mascaradas (mostrar apenas últimos 8 caracteres)
+                return Ok(apiKeys.Select(k => new
                 {
                     k.Id,
                     Key = MaskApiKey(k.Key),
@@ -74,9 +74,7 @@ public class ApiKeysController : ControllerBase
                     k.UsageCount,
                     k.RateLimit,
                     k.CreatedAt
-                });
-
-                return Ok(maskedKeys);
+                }));
             }
             catch (Npgsql.PostgresException pgEx)
             {
@@ -88,23 +86,6 @@ public class ApiKeysController : ControllerBase
                 _logger.LogError(ex, "Unexpected error fetching API keys for tenant {TenantId}", tenantGuid);
                 return StatusCode(500, new { message = "Internal server error" });
             }
-
-            // Mascarar as keys na resposta (mostrar apenas últimos 8 caracteres)
-            var maskedKeys = apiKeys.Select(k => new
-            {
-                k.Id,
-                Key = MaskApiKey(k.Key),
-                k.Name,
-                k.Description,
-                k.IsActive,
-                k.LastUsedAt,
-                k.ExpiresAt,
-                k.UsageCount,
-                k.RateLimit,
-                k.CreatedAt
-            });
-
-            return Ok(maskedKeys);
         }
         catch (Exception ex)
         {
