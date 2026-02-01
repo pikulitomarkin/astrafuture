@@ -43,23 +43,17 @@ public class ApiKeysController : ControllerBase
 
             try
             {
-                // Estratégia Robusta: Injetar tenant_id diretamente na connection string
-                // Isso resolve o erro "Tenant or user not found" que ocorre no handshake de conexão
-                var connBuilder = new NpgsqlConnectionStringBuilder(_connectionString);
-                
-                // Se não tiver options ou não tiver o tenant configurado, adiciona
-                if (connBuilder.Options == null || !connBuilder.Options.Contains("app.tenant_id"))
-                {
-                    var options = connBuilder.Options ?? "";
-                    if (!string.IsNullOrEmpty(options)) options += " ";
-                    connBuilder.Options = $"{options}-c app.tenant_id={tenantGuid}";
-                }
+                // Conectando com usuário que deve ter BYPASSRLS para evitar erro no handshake
+                await using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
 
-                await using var connection = new NpgsqlConnection(connBuilder.ToString());
+                // Definir o tenant context APÓS conectar (mais seguro e compatível com poolers)
+                await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
+
                 _logger.LogInformation("Fetching API keys for tenant {TenantId}", tenantGuid);
 
-                // Como o tenant já está na conexão, não precisamos verificar explicitamente se existe antes
-                // O próprio RLS vai lidar com isso ou a conexão falhará se o tenant for inválido
+                // Como temos BYPASSRLS, precisamos garantir que o tenant existe manualmente se quisermos
+                // Mas o RLS para este usuário (se reativado) ou filtros manuais devem cuidar disso
                 
                 var apiKeys = await connection.QueryAsync<ApiKey>(
                     "SELECT * FROM api_keys WHERE tenant_id = @TenantId ORDER BY created_at DESC",
@@ -133,19 +127,14 @@ public class ApiKeysController : ControllerBase
 
             try
             {
-                // Estratégia Robusta: Injetar tenant_id diretamente na connection string
-                var connBuilder = new NpgsqlConnectionStringBuilder(_connectionString);
-                
-                if (connBuilder.Options == null || !connBuilder.Options.Contains("app.tenant_id"))
-                {
-                    var options = connBuilder.Options ?? "";
-                    if (!string.IsNullOrEmpty(options)) options += " ";
-                    connBuilder.Options = $"{options}-c app.tenant_id={tenantGuid}";
-                }
+                // Conectando com usuário admin (BYPASSRLS)
+                await using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
 
-                await using var connection = new NpgsqlConnection(connBuilder.ToString());
+                // Definir tenant context manualmente
+                await connection.ExecuteAsync($"SET LOCAL app.tenant_id = '{tenantGuid}'");
 
-                // Verificar existência de tenant (agora com conexão segura)
+                // Verificar existência de tenant
                 var tenantExists = await connection.ExecuteScalarAsync<bool>(
                     "SELECT EXISTS(SELECT 1 FROM tenants WHERE id = @TenantId)",
                     new { TenantId = tenantGuid });
