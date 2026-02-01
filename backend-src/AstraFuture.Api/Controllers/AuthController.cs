@@ -27,6 +27,22 @@ public class AuthController : ControllerBase
         _httpClient = httpClientFactory.CreateClient("Supabase");
     }
 
+    // Helper: Slugify simples
+    private static string Slugify(string input)
+    {
+        var s = input.ToLowerInvariant();
+        var sb = new System.Text.StringBuilder();
+        foreach (var ch in s)
+        {
+            if (char.IsLetterOrDigit(ch) || ch == '-') sb.Append(ch);
+            else if (char.IsWhiteSpace(ch) || ch == '_') sb.Append('-');
+        }
+        var slug = sb.ToString();
+        while (slug.Contains("--")) slug = slug.Replace("--", "-");
+        if (slug.Length == 0) slug = "tenant";
+        return slug.Length > 50 ? slug.Substring(0, 50) : slug;
+    }
+
     // Lê a Supabase anon key aceitando diferentes convenções de nome
     private string GetSupabaseAnonKey()
     {
@@ -91,8 +107,84 @@ public class AuthController : ControllerBase
             var userId = result.TryGetProperty("user", out var user) && user.TryGetProperty("id", out var id) 
                 ? id.GetString() : Guid.NewGuid().ToString();
             
-            var tenantId = request.TenantId?.ToString() ?? Guid.NewGuid().ToString();
-            
+            // Verificar flag de autocriação de tenant
+            var autoCreate = false;
+            var autoCreateCfg = Environment.GetEnvironmentVariable("AUTO_CREATE_TENANT") ?? _configuration["AUTO_CREATE_TENANT"];
+            if (!string.IsNullOrEmpty(autoCreateCfg) && bool.TryParse(autoCreateCfg, out var ac)) autoCreate = ac;
+
+            string tenantId;
+
+            if (request.TenantId.HasValue)
+            {
+                tenantId = request.TenantId.Value.ToString();
+            }
+            else if (autoCreate)
+            {
+                // Criar tenant automaticamente
+                var tenantGuid = Guid.NewGuid();
+                var tenantName = string.IsNullOrEmpty(request.BusinessName) ? $"Tenant de {request.Email}" : request.BusinessName;
+                var slugBase = Slugify(tenantName);
+                var slug = slugBase;
+
+                var connectionString = _configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string not found");
+                await using (var conn = new NpgsqlConnection(connectionString))
+                {
+                    await conn.OpenAsync();
+
+                    // Garantir slug único
+                    var exists = await conn.ExecuteScalarAsync<bool>("SELECT EXISTS(SELECT 1 FROM tenants WHERE slug = @Slug)", new { Slug = slug });
+                    if (exists)
+                    {
+                        slug = slug + "-" + tenantGuid.ToString().Substring(0, 8);
+                    }
+
+                    await conn.ExecuteAsync(@"INSERT INTO tenants (id, name, slug, tenant_type, subscription_tier, created_at, updated_at)
+                                                VALUES (@Id, @Name, @Slug, @Type, @Tier, @Now, @Now)",
+                        new { Id = tenantGuid, Name = tenantName, Slug = slug, Type = "general", Tier = "free", Now = DateTime.UtcNow });
+
+                    // Criar usuário na tabela app.users vinculado ao tenant (owner)
+                    var appUserId = Guid.NewGuid();
+                    await conn.ExecuteAsync(@"INSERT INTO users (id, tenant_id, auth_user_id, email, full_name, role, is_active, email_verified_at, created_at, updated_at)
+                                              VALUES (@Id, @TenantId, @AuthUserId, @Email, @FullName, @Role, true, NOW(), NOW(), NOW())",
+                        new { Id = appUserId, TenantId = tenantGuid, AuthUserId = Guid.Parse(userId), Email = request.Email, FullName = request.FullName ?? request.Email, Role = "owner" });
+                }
+
+                tenantId = tenantGuid.ToString();
+
+                // Atualizar user_metadata no Supabase via service role key, se disponível
+                var serviceKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY") ?? _configuration["Supabase:ServiceRoleKey"];
+                if (!string.IsNullOrEmpty(serviceKey))
+                {
+                    try
+                    {
+                        var adminPayload = JsonSerializer.Serialize(new { user_metadata = new { tenant_id = tenantId } });
+                        var adminReq = new HttpRequestMessage(new HttpMethod("PATCH"), $"{supabaseUrl}/auth/v1/admin/users/{userId}")
+                        {
+                            Content = new StringContent(adminPayload, Encoding.UTF8, "application/json")
+                        };
+                        adminReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serviceKey);
+                        adminReq.Headers.Add("apikey", serviceKey);
+
+                        var adminResp = await _httpClient.SendAsync(adminReq);
+                        if (!adminResp.IsSuccessStatusCode)
+                        {
+                            var body = await adminResp.Content.ReadAsStringAsync();
+                            _logger.LogWarning("Failed to update user_metadata for {UserId} via admin API: {Status}, {Body}", userId, adminResp.StatusCode, body);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Error updating Supabase user metadata for {UserId}", userId);
+                    }
+                }
+            }
+            else
+            {
+                // Sem tenant informado e sem autocriação -> erro cliente
+                _logger.LogWarning("Attempt to register user without tenant: {Email}", request.Email);
+                return BadRequest(new { error = "Tenant not provided. Contact administrator or provide tenant_id." });
+            }
+
             // Gerar nosso próprio JWT
             var token = GenerateJwtToken(userId!, request.Email, tenantId);
             
