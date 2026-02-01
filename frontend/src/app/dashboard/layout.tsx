@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { Sidebar } from '@/components/dashboard/sidebar'
@@ -12,12 +12,28 @@ export default function DashboardLayout({
 }) {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Marcar como hidratado após primeiro render
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    // Só redirecionar após hidratação do Zustand
+    if (isHydrated && !isAuthenticated) {
       router.push('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isHydrated, router])
+
+  // Aguardar hidratação antes de renderizar
+  if (!isHydrated) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="text-muted-foreground">Carregando...</div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return null

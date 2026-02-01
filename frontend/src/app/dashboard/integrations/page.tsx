@@ -10,6 +10,7 @@ import { ApiKeyRevealDialog } from '@/components/integrations/api-key-reveal-dia
 import { Plus, Key, Trash2, Copy, Check, ExternalLink, AlertCircle } from 'lucide-react'
 import { useDeleteApiKey, useUpdateApiKey } from '@/hooks/use-api-keys'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 
 export default function IntegrationsPage() {

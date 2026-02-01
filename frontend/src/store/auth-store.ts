@@ -33,10 +33,18 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
       onRehydrateStorage: () => (state) => {
         // Após hidratar, verificar se há token válido e atualizar isAuthenticated
-        if (state?.token && state?.user) {
-          state.isAuthenticated = true
+        if (state && state.token && state.user) {
+          // Já vem com isAuthenticated: true do storage
+          console.log('[Auth] Sessão restaurada:', { user: state.user.email })
+        } else {
+          console.log('[Auth] Nenhuma sessão encontrada')
         }
       },
     }
