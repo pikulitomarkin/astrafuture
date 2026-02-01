@@ -243,11 +243,11 @@ public class AuthController : ControllerBase
         // Log a short hash of the secret at token creation time for correlation with validation logs
         try
         {
-            var jwtSecret = Environment.GetEnvironmentVariable("SUPABASE_JWT_SECRET") ?? _configuration["Supabase:JwtSecret"] ?? string.Empty;
-            if (!string.IsNullOrEmpty(jwtSecret))
+            var secretToHash = jwtSecret;
+            if (!string.IsNullOrEmpty(secretToHash))
             {
                 using var sha = System.Security.Cryptography.SHA256.Create();
-                var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(jwtSecret));
+                var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(secretToHash));
                 var hex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
                 _logger.LogInformation("[AUTH] JWT secret SHA256 prefix when signing: {Hash}", hex.Substring(0, 8));
             }
