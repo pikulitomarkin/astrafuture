@@ -23,9 +23,14 @@ export function useCreateCustomer() {
 
   return useMutation({
     mutationFn: (data: Partial<Customer>) => apiClient.createCustomer(data),
+    onMutate: async () => {
+      // Cancela queries em andamento
+      await queryClient.cancelQueries({ queryKey: ['customers'] })
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
       toast.success('Cliente criado com sucesso!')
+      // Refetch imediato
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Erro ao criar cliente')
@@ -39,12 +44,35 @@ export function useUpdateCustomer() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Customer> }) =>
       apiClient.updateCustomer(id, data),
+    onMutate: async ({ id, data }) => {
+      // Cancela queries em andamento
+      await queryClient.cancelQueries({ queryKey: ['customers'] })
+
+      // Snapshot do estado anterior
+      const previousCustomers = queryClient.getQueryData<Customer[]>(['customers'])
+
+      // Atualiza otimisticamente
+      if (previousCustomers) {
+        queryClient.setQueryData<Customer[]>(
+          ['customers'],
+          previousCustomers.map(customer => customer.id === id ? { ...customer, ...data } : customer)
+        )
+      }
+
+      return { previousCustomers }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
       toast.success('Cliente atualizado com sucesso!')
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // Rollback
+      if (context?.previousCustomers) {
+        queryClient.setQueryData(['customers'], context.previousCustomers)
+      }
       toast.error(error.response?.data?.message || 'Erro ao atualizar cliente')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
   })
 }
@@ -54,12 +82,37 @@ export function useDeleteCustomer() {
 
   return useMutation({
     mutationFn: (id: string) => apiClient.deleteCustomer(id),
+    onMutate: async (id: string) => {
+      // Cancela queries em andamento
+      await queryClient.cancelQueries({ queryKey: ['customers'] })
+
+      // Snapshot do estado anterior
+      const previousCustomers = queryClient.getQueryData<Customer[]>(['customers'])
+
+      // Remove otimisticamente da UI
+      if (previousCustomers) {
+        queryClient.setQueryData<Customer[]>(
+          ['customers'],
+          previousCustomers.filter(customer => customer.id !== id)
+        )
+      }
+
+      // Retorna contexto para rollback se falhar
+      return { previousCustomers }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
       toast.success('Cliente excluído com sucesso!')
     },
-    onError: (error: any) => {
+    onError: (error: any, id, context) => {
+      // Rollback em caso de erro
+      if (context?.previousCustomers) {
+        queryClient.setQueryData(['customers'], context.previousCustomers)
+      }
       toast.error(error.response?.data?.message || 'Erro ao excluir cliente')
+    },
+    onSettled: () => {
+      // Refetch para garantir sincronização
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
   })
 }
