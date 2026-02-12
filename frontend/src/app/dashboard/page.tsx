@@ -20,12 +20,16 @@ export default function DashboardPage() {
   const next7Days = endOfDay(addDays(today, 7))
 
   const appointmentsToday = appointments?.filter(apt => {
-    const aptDate = new Date(apt.scheduledAt || apt.startTime)
+    const dateStr = apt.scheduledAt || apt.startTime
+    if (!dateStr) return false
+    const aptDate = new Date(dateStr)
     return isWithinInterval(aptDate, { start: todayStart, end: todayEnd })
   }).length || 0
 
   const appointmentsNext7Days = appointments?.filter(apt => {
-    const aptDate = new Date(apt.scheduledAt || apt.startTime)
+    const dateStr = apt.scheduledAt || apt.startTime
+    if (!dateStr) return false
+    const aptDate = new Date(dateStr)
     return isWithinInterval(aptDate, { start: today, end: next7Days })
   }).length || 0
 
@@ -166,15 +170,24 @@ export default function DashboardPage() {
               ) : appointments && appointments.length > 0 ? (
                 <div className="space-y-3">
                   {appointments
-                    .filter(apt => new Date(apt.scheduledAt || apt.startTime) >= today)
-                    .sort((a, b) => new Date(a.scheduledAt || a.startTime).getTime() - new Date(b.scheduledAt || b.startTime).getTime())
+                    .filter(apt => {
+                      const dateStr = apt.scheduledAt || apt.startTime
+                      return dateStr && new Date(dateStr) >= today
+                    })
+                    .sort((a, b) => {
+                      const dateA = new Date(a.scheduledAt || a.startTime || 0)
+                      const dateB = new Date(b.scheduledAt || b.startTime || 0)
+                      return dateA.getTime() - dateB.getTime()
+                    })
                     .slice(0, 3)
-                    .map(apt => (
+                    .map(apt => {
+                      const dateStr = apt.scheduledAt || apt.startTime || ''
+                      return (
                       <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                         <div>
                           <p className="font-semibold text-sm text-[#075E54]">{apt.customer?.name || 'Cliente'}</p>
                           <p className="text-xs text-[#333333]">
-                            {format(new Date(apt.scheduledAt || apt.startTime), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            {dateStr ? format(new Date(dateStr), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : 'Data não disponível'}
                           </p>
                         </div>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
@@ -187,8 +200,12 @@ export default function DashboardPage() {
                            apt.status}
                         </span>
                       </div>
-                    ))}
-                  {appointments.filter(apt => new Date(apt.scheduledAt || apt.startTime) >= today).length === 0 && (
+                    )})
+                  )}
+                  {appointments.filter(apt => {
+                    const dateStr = apt.scheduledAt || apt.startTime
+                    return dateStr && new Date(dateStr) >= today
+                  }).length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       Nenhum agendamento futuro
                     </p>
