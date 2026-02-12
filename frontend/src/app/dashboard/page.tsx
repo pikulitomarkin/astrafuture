@@ -183,25 +183,25 @@ export default function DashboardPage() {
                     .map(apt => {
                       const dateStr = apt.scheduledAt || apt.startTime || ''
                       return (
-                      <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div>
-                          <p className="font-semibold text-sm text-[#075E54]">{apt.customer?.name || 'Cliente'}</p>
-                          <p className="text-xs text-[#333333]">
-                            {dateStr ? format(new Date(dateStr), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : 'Data não disponível'}
-                          </p>
+                        <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div>
+                            <p className="font-semibold text-sm text-[#075E54]">{apt.customer?.name || 'Cliente'}</p>
+                            <p className="text-xs text-[#333333]">
+                              {dateStr ? format(new Date(dateStr), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : 'Data não disponível'}
+                            </p>
+                          </div>
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            apt.status === 'confirmed' ? 'bg-[#25D366]/20 text-[#075E54]' :
+                            apt.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {apt.status === 'confirmed' ? 'Confirmado' :
+                             apt.status === 'scheduled' ? 'Agendado' :
+                             apt.status}
+                          </span>
                         </div>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          apt.status === 'confirmed' ? 'bg-[#25D366]/20 text-[#075E54]' :
-                          apt.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {apt.status === 'confirmed' ? 'Confirmado' :
-                           apt.status === 'scheduled' ? 'Agendado' :
-                           apt.status}
-                        </span>
-                      </div>
-                    )})
-                  )}
+                      )
+                    })}
                   {appointments.filter(apt => {
                     const dateStr = apt.scheduledAt || apt.startTime
                     return dateStr && new Date(dateStr) >= today
