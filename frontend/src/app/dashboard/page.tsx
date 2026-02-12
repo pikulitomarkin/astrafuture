@@ -20,12 +20,12 @@ export default function DashboardPage() {
   const next7Days = endOfDay(addDays(today, 7))
 
   const appointmentsToday = appointments?.filter(apt => {
-    const aptDate = new Date(apt.startTime)
+    const aptDate = new Date(apt.scheduledAt || apt.startTime)
     return isWithinInterval(aptDate, { start: todayStart, end: todayEnd })
   }).length || 0
 
   const appointmentsNext7Days = appointments?.filter(apt => {
-    const aptDate = new Date(apt.startTime)
+    const aptDate = new Date(apt.scheduledAt || apt.startTime)
     return isWithinInterval(aptDate, { start: today, end: next7Days })
   }).length || 0
 
@@ -166,15 +166,15 @@ export default function DashboardPage() {
               ) : appointments && appointments.length > 0 ? (
                 <div className="space-y-3">
                   {appointments
-                    .filter(apt => new Date(apt.startTime) >= today)
-                    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                    .filter(apt => new Date(apt.scheduledAt || apt.startTime) >= today)
+                    .sort((a, b) => new Date(a.scheduledAt || a.startTime).getTime() - new Date(b.scheduledAt || b.startTime).getTime())
                     .slice(0, 3)
                     .map(apt => (
                       <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                         <div>
                           <p className="font-semibold text-sm text-[#075E54]">{apt.customer?.name || 'Cliente'}</p>
                           <p className="text-xs text-[#333333]">
-                            {format(new Date(apt.startTime), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            {format(new Date(apt.scheduledAt || apt.startTime), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                           </p>
                         </div>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     ))}
-                  {appointments.filter(apt => new Date(apt.startTime) >= today).length === 0 && (
+                  {appointments.filter(apt => new Date(apt.scheduledAt || apt.startTime) >= today).length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       Nenhum agendamento futuro
                     </p>

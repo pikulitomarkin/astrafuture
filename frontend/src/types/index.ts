@@ -3,11 +3,17 @@ export interface Appointment {
   tenantId: string
   customerId: string
   resourceId?: string
-  startTime: string
-  endTime: string
+  title?: string
+  description?: string
+  scheduledAt: string  // Campo retornado pelo backend
+  endsAt: string        // Campo retornado pelo backend
+  startTime?: string    // Manter para compatibilidade
+  endTime?: string      // Manter para compatibilidade
+  durationMinutes?: number
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+  appointmentType?: string
   notes?: string
-  reminderSent: boolean
+  reminderSent?: boolean
   createdAt: string
   updatedAt: string
   customer?: Customer

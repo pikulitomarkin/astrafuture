@@ -32,9 +32,11 @@ export function AppointmentDialog({ open, onOpenChange, appointment }: Appointme
   const [customerId, setCustomerId] = useState(appointment?.customerId || '')
   const [resourceId, setResourceId] = useState(appointment?.resourceId || '')
   const [startTime, setStartTime] = useState(
+    appointment?.scheduledAt ? format(new Date(appointment.scheduledAt), "yyyy-MM-dd'T'HH:mm") : 
     appointment?.startTime ? format(new Date(appointment.startTime), "yyyy-MM-dd'T'HH:mm") : ''
   )
   const [endTime, setEndTime] = useState(
+    appointment?.endsAt ? format(new Date(appointment.endsAt), "yyyy-MM-dd'T'HH:mm") : 
     appointment?.endTime ? format(new Date(appointment.endTime), "yyyy-MM-dd'T'HH:mm") : ''
   )
   const [status, setStatus] = useState(appointment?.status || 'scheduled')
@@ -49,8 +51,14 @@ export function AppointmentDialog({ open, onOpenChange, appointment }: Appointme
     if (appointment) {
       setCustomerId(appointment.customerId)
       setResourceId(appointment.resourceId || '')
-      setStartTime(format(new Date(appointment.startTime), "yyyy-MM-dd'T'HH:mm"))
-      setEndTime(format(new Date(appointment.endTime), "yyyy-MM-dd'T'HH:mm"))
+      const scheduledAt = appointment.scheduledAt || appointment.startTime
+      const endsAt = appointment.endsAt || appointment.endTime
+      if (scheduledAt) {
+        setStartTime(format(new Date(scheduledAt), "yyyy-MM-dd'T'HH:mm"))
+      }
+      if (endsAt) {
+        setEndTime(format(new Date(endsAt), "yyyy-MM-dd'T'HH:mm"))
+      }
       setStatus(appointment.status)
       setNotes(appointment.notes || '')
     }
@@ -59,11 +67,16 @@ export function AppointmentDialog({ open, onOpenChange, appointment }: Appointme
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const scheduledAtDate = new Date(startTime)
+    const endsAtDate = new Date(endTime)
+    const durationMinutes = Math.round((endsAtDate.getTime() - scheduledAtDate.getTime()) / (1000 * 60))
+
     const data = {
       customerId,
       resourceId: resourceId || undefined,
-      startTime: new Date(startTime).toISOString(),
-      endTime: new Date(endTime).toISOString(),
+      scheduledAt: scheduledAtDate.toISOString(),
+      endsAt: endsAtDate.toISOString(),
+      durationMinutes,
       status,
       notes: notes || undefined,
     }

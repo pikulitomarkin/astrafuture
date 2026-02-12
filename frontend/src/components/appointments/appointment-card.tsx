@@ -46,13 +46,13 @@ export function AppointmentCard({ appointment, onEdit, onDelete }: AppointmentCa
             <div className="space-y-2">
               <div className="flex items-center text-gray-700">
                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                <span className="font-medium">{formatDate(appointment.startTime)}</span>
+                <span className="font-medium">{formatDate(appointment.scheduledAt || appointment.startTime || '')}</span>
               </div>
 
               <div className="flex items-center text-gray-700">
                 <Clock className="h-4 w-4 mr-2 text-gray-400" />
                 <span>
-                  {formatTime(appointment.startTime)} - {formatTime(appointment.endTime)}
+                  {formatTime(appointment.scheduledAt || appointment.startTime || '')} - {formatTime(appointment.endsAt || appointment.endTime || '')}
                 </span>
               </div>
 

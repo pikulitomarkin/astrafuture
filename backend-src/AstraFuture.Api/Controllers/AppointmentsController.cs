@@ -127,38 +127,126 @@ public class AppointmentsController : ControllerBase
     {
         try
         {
-            // Parse manual do JSON
-            var request = new CreateAppointmentRequest
+            // Parse manual do JSON - suportando múltiplos formatos
+            Guid tenantId;
+            Guid customerId;
+            Guid? resourceId = null;
+            string title = "";
+            string description = "";
+            DateTime scheduledAt;
+            int durationMinutes = 60; // default
+            string location = "";
+            string appointmentType = "consultation";
+            string notes = "";
+
+            // Parse TenantId (obrigatório)
+            if (json.TryGetProperty("tenantId", out var tenantIdProp))
             {
-                TenantId = json.GetProperty("tenantId").GetGuid(),
-                CustomerId = json.GetProperty("customerId").GetGuid(),
-                ResourceId = json.GetProperty("resourceId").GetGuid(),
-                Title = json.GetProperty("title").GetString() ?? "",
-                Description = json.TryGetProperty("description", out var desc) ? desc.GetString() ?? "" : "",
-                ScheduledAt = json.GetProperty("scheduledAt").GetDateTime(),
-                DurationMinutes = json.GetProperty("durationMinutes").GetInt32(),
-                Location = json.TryGetProperty("location", out var loc) ? loc.GetString() ?? "" : "",
-                AppointmentType = json.GetProperty("appointmentType").GetString() ?? "consultation",
-                Notes = json.TryGetProperty("notes", out var n) ? n.GetString() ?? "" : ""
-            };
-            
+                tenantId = tenantIdProp.GetGuid();
+            }
+            else
+            {
+                // Extrair do JWT se não fornecido
+                var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+                if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out tenantId))
+                {
+                    _logger.LogWarning("Missing tenant_id in request and JWT");
+                    return BadRequest(new { error = "tenant_id is required" });
+                }
+            }
+
+            // Parse CustomerId (obrigatório)
+            if (!json.TryGetProperty("customerId", out var customerIdProp))
+            {
+                return BadRequest(new { error = "customerId is required" });
+            }
+            customerId = customerIdProp.GetGuid();
+
+            // Parse ResourceId (opcional)
+            if (json.TryGetProperty("resourceId", out var resourceIdProp) && resourceIdProp.ValueKind != System.Text.Json.JsonValueKind.Null)
+            {
+                resourceId = resourceIdProp.GetGuid();
+            }
+
+            // Parse Title (opcional)
+            if (json.TryGetProperty("title", out var titleProp))
+            {
+                title = titleProp.GetString() ?? "";
+            }
+
+            // Parse Description (opcional)
+            if (json.TryGetProperty("description", out var descProp))
+            {
+                description = descProp.GetString() ?? "";
+            }
+
+            // Parse ScheduledAt (obrigatório) - aceita scheduledAt ou startTime
+            if (json.TryGetProperty("scheduledAt", out var scheduledAtProp))
+            {
+                scheduledAt = scheduledAtProp.GetDateTime();
+            }
+            else if (json.TryGetProperty("startTime", out var startTimeProp))
+            {
+                scheduledAt = startTimeProp.GetDateTime();
+            }
+            else
+            {
+                return BadRequest(new { error = "scheduledAt or startTime is required" });
+            }
+
+            // Parse DurationMinutes - aceita durationMinutes direto ou calcula de endsAt/endTime
+            if (json.TryGetProperty("durationMinutes", out var durationProp))
+            {
+                durationMinutes = durationProp.GetInt32();
+            }
+            else if (json.TryGetProperty("endsAt", out var endsAtProp))
+            {
+                var endsAt = endsAtProp.GetDateTime();
+                durationMinutes = (int)(endsAt - scheduledAt).TotalMinutes;
+            }
+            else if (json.TryGetProperty("endTime", out var endTimeProp))
+            {
+                var endTime = endTimeProp.GetDateTime();
+                durationMinutes = (int)(endTime - scheduledAt).TotalMinutes;
+            }
+
+            // Parse Location (opcional)
+            if (json.TryGetProperty("location", out var locProp))
+            {
+                location = locProp.GetString() ?? "";
+            }
+
+            // Parse AppointmentType (opcional)
+            if (json.TryGetProperty("appointmentType", out var typeProp))
+            {
+                appointmentType = typeProp.GetString() ?? "consultation";
+            }
+
+            // Parse Notes (opcional)
+            if (json.TryGetProperty("notes", out var notesProp))
+            {
+                notes = notesProp.GetString() ?? "";
+            }
+
             _logger.LogInformation(
-                "Creating appointment for tenant {TenantId}, customer {CustomerId}", 
-                request.TenantId, 
-                request.CustomerId);
+                "Creating appointment for tenant {TenantId}, customer {CustomerId}, scheduled at {ScheduledAt}, duration {Duration}min", 
+                tenantId, 
+                customerId,
+                scheduledAt,
+                durationMinutes);
 
             var command = new CreateAppointmentCommand
             {
-                TenantId = request.TenantId,
-                CustomerId = request.CustomerId,
-                ResourceId = request.ResourceId,
-                Title = request.Title,
-                Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description,
-                ScheduledAt = request.ScheduledAt,
-                DurationMinutes = request.DurationMinutes,
-                Location = string.IsNullOrWhiteSpace(request.Location) ? null : request.Location,
-                AppointmentType = request.AppointmentType,
-                Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes
+                TenantId = tenantId,
+                CustomerId = customerId,
+                ResourceId = resourceId ?? Guid.Empty,
+                Title = string.IsNullOrWhiteSpace(title) ? "Agendamento" : title,
+                Description = string.IsNullOrWhiteSpace(description) ? null : description,
+                ScheduledAt = scheduledAt,
+                DurationMinutes = durationMinutes,
+                Location = string.IsNullOrWhiteSpace(location) ? null : location,
+                AppointmentType = appointmentType,
+                Notes = string.IsNullOrWhiteSpace(notes) ? null : notes
             };
 
             var appointmentId = await _mediator.Send(command);
@@ -191,7 +279,7 @@ public class AppointmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update(
         Guid id,
-        [FromBody] UpdateAppointmentRequest request)
+        [FromBody] System.Text.Json.JsonElement json)
     {
         try
         {
@@ -205,16 +293,73 @@ public class AppointmentsController : ControllerBase
 
             _logger.LogInformation("Updating appointment {Id} for tenant {TenantId}", id, tenantId);
 
+            // Parse campos opcionais
+            string? title = null;
+            string? description = null;
+            DateTime? scheduledAt = null;
+            int? durationMinutes = null;
+            string? status = null;
+            string? appointmentType = null;
+
+            if (json.TryGetProperty("title", out var titleProp))
+            {
+                title = titleProp.GetString();
+            }
+
+            if (json.TryGetProperty("description", out var descProp))
+            {
+                description = descProp.GetString();
+            }
+
+            // Parse ScheduledAt - aceita scheduledAt ou startTime
+            if (json.TryGetProperty("scheduledAt", out var scheduledAtProp))
+            {
+                scheduledAt = scheduledAtProp.GetDateTime();
+            }
+            else if (json.TryGetProperty("startTime", out var startTimeProp))
+            {
+                scheduledAt = startTimeProp.GetDateTime();
+            }
+
+            // Parse DurationMinutes - aceita durationMinutes direto ou calcula de endsAt/endTime
+            if (json.TryGetProperty("durationMinutes", out var durationProp))
+            {
+                durationMinutes = durationProp.GetInt32();
+            }
+            else if (scheduledAt.HasValue)
+            {
+                if (json.TryGetProperty("endsAt", out var endsAtProp))
+                {
+                    var endsAt = endsAtProp.GetDateTime();
+                    durationMinutes = (int)(endsAt - scheduledAt.Value).TotalMinutes;
+                }
+                else if (json.TryGetProperty("endTime", out var endTimeProp))
+                {
+                    var endTime = endTimeProp.GetDateTime();
+                    durationMinutes = (int)(endTime - scheduledAt.Value).TotalMinutes;
+                }
+            }
+
+            if (json.TryGetProperty("status", out var statusProp))
+            {
+                status = statusProp.GetString();
+            }
+
+            if (json.TryGetProperty("appointmentType", out var typeProp))
+            {
+                appointmentType = typeProp.GetString();
+            }
+
             var command = new UpdateAppointmentCommand
             {
                 Id = id,
                 TenantId = tenantId,
-                Title = request.Title,
-                Description = request.Description,
-                ScheduledAt = request.ScheduledAt,
-                DurationMinutes = request.DurationMinutes,
-                Status = request.Status,
-                AppointmentType = request.AppointmentType
+                Title = title ?? "Agendamento",
+                Description = description,
+                ScheduledAt = scheduledAt ?? DateTime.UtcNow,
+                DurationMinutes = durationMinutes ?? 60,
+                Status = status,
+                AppointmentType = appointmentType ?? "consultation"
             };
 
             var updated = await _mediator.Send(command);
