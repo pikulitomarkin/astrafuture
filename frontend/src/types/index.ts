@@ -48,6 +48,16 @@ export interface User {
   email: string
   tenantId?: string
   businessName?: string
+  logoUrl?: string
+  primaryColor?: string
+}
+
+export interface TenantSettings {
+  name: string
+  logoUrl?: string
+  primaryColor?: string
+  timezone?: string
+  locale?: string
 }
 
 export interface AuthResponse {

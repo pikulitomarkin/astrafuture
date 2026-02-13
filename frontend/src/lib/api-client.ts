@@ -8,7 +8,8 @@ import type {
   Resource,
   ApiKey,
   CreateApiKeyRequest,
-  WebhookUrls
+  WebhookUrls,
+  TenantSettings
 } from '@/types'
 
 class ApiClient {
@@ -183,6 +184,16 @@ class ApiClient {
   async getWebhookUrls(): Promise<WebhookUrls> {
     const response = await this.client.get<WebhookUrls>('/apikeys/webhook-url')
     return response.data
+  }
+
+  // Settings
+  async getSettings(): Promise<TenantSettings> {
+    const response = await this.client.get<TenantSettings>('/settings')
+    return response.data
+  }
+
+  async updateSettings(data: Partial<TenantSettings>): Promise<void> {
+    await this.client.put('/settings', data)
   }
 }
 
