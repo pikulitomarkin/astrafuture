@@ -18,10 +18,11 @@ COPY src/ ./src/
 
 # Variáveis de ambiente
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 ENV PORT=5000
 
 # Expor porta
 EXPOSE 5000
 
-# Comando para iniciar o bot
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "src.bot:app"]
+# Script de inicialização para usar PORT dinâmico
+CMD gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120 --access-logfile - --error-logfile - src.bot:app

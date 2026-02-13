@@ -1,7 +1,7 @@
 # Railway Configuration
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "whatsapp-bot/Dockerfile"
 
 [deploy]
 startCommand = ""
